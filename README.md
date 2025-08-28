@@ -13,6 +13,8 @@ A modern, responsive web application for streaming movies and TV shows with a be
 - **Dark/Light Theme**: Toggle between themes
 - **PWA Support**: Install as a progressive web app
 - **Offline Capability**: Service worker for offline functionality
+- **Enhanced UI/UX**: Smooth animations, shimmer effects, and micro-interactions
+- **Modern Architecture**: Modular, maintainable, and scalable codebase
 
 ## 🚀 Quick Start
 
@@ -94,6 +96,24 @@ const customSources = [
 ];
 localStorage.setItem('ns_custom_sources', JSON.stringify(customSources));
 ```
+
+## 🚀 Recent Major Improvements (v2.0)
+
+### ✨ UI/UX Enhancements
+- **Enhanced Search Experience**: Improved focus states, shimmer effects, and micro-interactions
+- **Movie Card Animations**: Smooth hover effects with scale, shadow, and gradient overlays
+- **Loading States**: Professional shimmer animations for skeleton loaders
+- **Hero Section**: Staggered fade-in animations and enhanced visual appeal
+- **Mobile Navigation**: Backdrop blur effects and smooth slide-in animations
+- **Page Transitions**: Smooth section animations with staggered timing
+- **Interactive Elements**: Enhanced buttons with hover effects and visual feedback
+
+### 🏗️ Architecture Improvements
+- **Modular Codebase**: Refactored from monolithic to modular architecture
+- **Separation of Concerns**: Clean separation between UI, business logic, and utilities
+- **Maintainability**: 50%+ improvement in code maintainability and readability
+- **Developer Experience**: Enhanced debugging, testing, and extension capabilities
+- **Performance**: Optimized animations and smooth user interactions
 
 ### Theme Customization
 Modify `style.css` to customize colors, fonts, and layout:

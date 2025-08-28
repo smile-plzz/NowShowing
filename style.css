@@ -233,6 +233,7 @@ main {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(20px);
     z-index: 999;
     justify-content: center;
     align-items: center;
@@ -247,11 +248,31 @@ main {
     list-style: none;
     padding: 0;
     text-align: center;
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .mobile-nav-links li {
     margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeInUp 0.3s ease-out forwards;
 }
+
+.mobile-nav-links li:nth-child(1) { animation-delay: 0.1s; }
+.mobile-nav-links li:nth-child(2) { animation-delay: 0.2s; }
+.mobile-nav-links li:nth-child(3) { animation-delay: 0.3s; }
+.mobile-nav-links li:nth-child(4) { animation-delay: 0.4s; }
+.mobile-nav-links li:nth-child(5) { animation-delay: 0.5s; }
 
 .mobile-nav-links a {
     color: var(--text-color);
@@ -277,11 +298,48 @@ main {
     color: white;
     background: linear-gradient(180deg, rgba(7, 7, 10, 0.5), rgba(7, 7, 10, 0.9)), url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center/cover;
     padding: 0 2rem;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(95, 51, 255, 0.1) 100%);
+    z-index: 1;
 }
 
 .hero-content {
     max-width: 800px;
     width: 100%;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-subtitle {
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.hero-content .search-container {
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .hero-title {
@@ -349,7 +407,16 @@ main {
     padding: 4rem 2rem;
     max-width: 1200px;
     margin: 0 auto;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease-out forwards;
 }
+
+.movies-section:nth-child(1) { animation-delay: 0.1s; }
+.movies-section:nth-child(2) { animation-delay: 0.2s; }
+.movies-section:nth-child(3) { animation-delay: 0.3s; }
+.movies-section:nth-child(4) { animation-delay: 0.4s; }
+.movies-section:nth-child(5) { animation-delay: 0.5s; }
 
 .movies-section h2 {
     font-size: 2.2rem;
@@ -522,6 +589,24 @@ main {
     transform: scale(1.04);
 }
 
+.movie-card-image-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.8) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.movie-card:hover .movie-card-image-container::before {
+    opacity: 1;
+}
+
 /* Image loading states */
 .image-loading {
     opacity: 0.7;
@@ -629,10 +714,17 @@ main {
 
 /* --- Skeleton Loader --- */
 .skeleton-card {
-    background-color: var(--skeleton-color);
+    background: linear-gradient(90deg, var(--skeleton-color) 25%, rgba(255, 255, 255, 0.1) 50%, var(--skeleton-color) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
 }
 
 .skeleton-img {
@@ -798,6 +890,8 @@ main {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
     color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
 }
 
 .source-button.is-available {
@@ -979,6 +1073,23 @@ main {
     font-weight: 600;
     transition: background-color 0.3s, transform 0.1s ease, box-shadow 0.2s ease;
     box-shadow: 0 10px 24px rgba(var(--primary-color-rgb), 0.35);
+    position: relative;
+    overflow: hidden;
+}
+
+.load-more-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.load-more-button:hover::before {
+    left: 100%;
 }
 
 .load-more-button:hover {
@@ -991,6 +1102,21 @@ main {
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
 }
 
 /* --- Responsive Design --- */
@@ -1460,6 +1586,7 @@ body.unresponsive::after {
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
+    position: relative;
 }
 
 .search-container:focus-within {
@@ -1476,6 +1603,11 @@ body.unresponsive::after {
     color: var(--text-color);
     font-size: 1rem;
     outline: none;
+    transition: all 0.3s ease;
+}
+
+#search-input:focus {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 #search-input::placeholder {
@@ -1492,6 +1624,23 @@ body.unresponsive::after {
     font-size: 1.1rem;
     transition: all 0.3s ease;
     min-width: 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+#search-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+#search-button:hover::before {
+    left: 100%;
 }
 
 #search-button:hover {
@@ -1545,7 +1694,7 @@ body.unresponsive::after {
 }
 
 .movie-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-8px) scale(1.02);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     border-color: var(--primary-color);
 }
