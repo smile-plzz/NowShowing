@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastFocusedElement = null; // To store the element that had focus before modal opened
     let currentOpenImdbId = null;
 
-    // --- NEW: Global cache for recommendation generation ---
+    // Global cache for recommendation generation (used for static fallback recommendations)
     let globalMovieCache = []; 
 
     const videoSources = [
@@ -733,13 +733,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // --- NEW: Populate Global Cache for Home Views Only ---
+            // --- NEW/MODIFIED: Populate Global Cache for Home Views Only ---
             if (container.id === 'popular-movies' && !append) {
                 // Clear and rebuild cache only on initial load, not load more
                 globalMovieCache = []; 
             }
             if (container.id === 'popular-movies' || container.id === 'popular-tv-shows') {
                 // Add valid movies to the global cache (only non-fallback, non-search results)
+                // We keep the cache populated from the home page for a potential fallback, 
+                // but we prioritize the new dynamic search in renderRecommendations.
                 movies.filter(m => !m.Title.startsWith('Movie ') && m.Response !== 'False').forEach(m => {
                     if (!globalMovieCache.some(c => c.imdbID === m.imdbID)) {
                         globalMovieCache.push(m);
@@ -1031,67 +1033,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
             console.log(`[ActorSearch] Triggered Google search for: ${actorName}`);
         },
+
+        /**
+         * Fetches a list of new movies based on a search query (e.g., a Genre).
+         * @param {string} query - The search query (e.g., "Action").
+         * @returns {Promise<Array<Object>>} A promise resolving to a list of up to 4 movies/shows.
+         */
+        async fetchDynamicSearchRecommendations(query) {
+            if (!query) return [];
+            
+            // Use API search to find relevant content based on the primary genre
+            const results = await api.fetchMoviesBySearch(query, 1);
+            
+            if (results && results.Response === 'True' && results.Search) {
+                // Filter out non-movie/series types and take only the first 4 results
+                return results.Search
+                    .filter(item => item.Type === 'movie' || item.Type === 'series')
+                    .slice(0, 4); 
+            }
+            return [];
+        },
         
         /**
-         * Logic to find up to 4 simple recommendations based on shared genres.
-         * @param {string} currentImdbID - The IMDB ID of the currently open title.
-         * @param {string} currentGenres - Comma-separated genre string (e.g., "Action, Sci-Fi").
-         * @returns {Array<Object>} List of recommended movie/show objects.
-         */
-        fetchSimpleRecommendations(currentImdbID, currentGenres) {
-            if (!currentGenres || currentGenres === 'N/A') return [];
-
-            const mainGenres = currentGenres.split(',').map(g => g.trim().toLowerCase());
-            const recommendations = [];
-            
-            // Iterate over the cached list of movies/shows on the homepage
-            for (const movie of globalMovieCache) {
-                // 1. Skip the current movie itself
-                if (movie.imdbID === currentImdbID) continue;
-                
-                // 2. Check for genre match
-                if (movie.Genre && movie.Genre !== 'N/A') {
-                    const movieGenres = movie.Genre.split(',').map(g => g.trim().toLowerCase());
-                    const hasSharedGenre = movieGenres.some(g => mainGenres.includes(g));
-
-                    if (hasSharedGenre) {
-                        recommendations.push(movie);
-                        if (recommendations.length >= 4) { // Limit to 4 recommendations
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            return recommendations;
-        },
-
-        /**
-         * Renders the recommendation section in the modal.
+         * Renders the recommendation section in the modal using a dynamic search based on genre.
          * @param {string} imdbID - The IMDB ID of the currently open title.
          * @param {string} genres - The genre string of the currently open title.
          */
-        renderRecommendations(imdbID, genres) {
+        async renderRecommendations(imdbID, genres) {
             const container = document.getElementById('recommendations-grid');
             const section = document.getElementById('recommendations-section');
-            if (!container || !section) return; // Defensive check for missing HTML
+            if (!container || !section) return;
 
-            container.innerHTML = '';
-            section.style.display = 'none';
+            container.innerHTML = '<h4>Loading related content...</h4>'; // Show loading state
+            section.style.display = 'block';
 
-            const recommendations = this.fetchSimpleRecommendations(imdbID, genres);
-
+            let recommendations = [];
+            
+            if (genres && genres !== 'N/A') {
+                // Extract the primary genre (the first one listed)
+                const primaryGenre = genres.split(',')[0].trim();
+                
+                // --- DYNAMIC CALL: Search OMDb by primary genre ---
+                recommendations = await this.fetchDynamicSearchRecommendations(primaryGenre);
+                // --------------------------------------------------
+            }
+            
             if (recommendations.length > 0) {
+                container.innerHTML = ''; // Clear loading message
                 recommendations.forEach(movie => {
-                    // Note: Since movies in cache only have search-level data (Title, Year, Poster, imdbID, Type) 
-                    // and not the detailed genre/plot, we are relying on the *cached* Genre property 
-                    // from the initial popular movie fetch, which should be present.
+                    // Create card for the newly searched recommendation
                     const card = this.createMovieCard(movie, false); 
                     if (card) {
                         container.appendChild(card);
                     }
                 });
-                section.style.display = 'block';
+            } else {
+                // Fallback if no dynamic search results are found
+                container.innerHTML = '<h4>No related content found based on genre.</h4>';
             }
         },
 
@@ -1154,8 +1152,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('modal-movie-production').textContent = details.Production;
                 document.getElementById('modal-movie-website').textContent = details.Website;
                 
-                // --- NEW: Render Recommendations ---
-                this.renderRecommendations(details.imdbID, details.Genre);
+                // --- DYNAMIC RECOMMENDATIONS CALL ---
+                await this.renderRecommendations(details.imdbID, details.Genre); // ADDED 'await'
                 // -----------------------------------
 
                 // Setup watchlist toggle state
