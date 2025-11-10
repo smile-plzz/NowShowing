@@ -1780,6 +1780,8 @@ body.home-page #watchlist-section {
     }
 }
 
+
+
 @media (max-width: 360px) {
     .movies-grid {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -1799,5 +1801,61 @@ body.home-page #watchlist-section {
     .movie-card-title {
         font-size: 0.8rem;
     }
+
+        /* Add this to your style.css */
+
+.remove-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 10;
+    color: var(--background-color, #17171f);
+    background-color: var(--text-color, #fff);
+    border: 2px solid var(--text-color, #fff);
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    line-height: 20px;
+    text-align: center;
+    font-size: 14px;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s, background-color 0.2s;
+}
+
+.movie-card:hover .remove-button {
+    opacity: 1;
+    background-color: var(--error-color, #dc3545); /* Highlight on hover */
+    color: #fff;
+    border-color: var(--error-color, #dc3545);
+}
+
+/* Ensure resume badge doesn't overlap the remove button awkwardly */
+.resume-badge {
+    /* Existing styles, ensure z-index is lower than remove-button (10) */
+    z-index: 5; 
+    /* Consider adjusting its position if it conflicts with the top-right corner */
+}
+
+    /* Add this to your main CSS file for the actor links in the modal */
+.actor-link {
+    color: var(--primary-color, #007bff); /* Use your primary color for links */
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.actor-link:hover, .actor-link:focus {
+    color: var(--secondary-color, #ffc107); /* Highlight on hover/focus */
+    text-decoration: underline;
+}
+
+.actor-list-container {
+    /* Ensures the list flows nicely */
+    display: inline; 
+}
+
+    
 }
 
