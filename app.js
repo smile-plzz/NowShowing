@@ -373,11 +373,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const filtered = list.filter(e => e.imdbID !== entry.imdbID);
             filtered.unshift({ ...entry, updatedAt: Date.now() });
             this.setContinueWatching(filtered.slice(0, 20));
+        },
+        
+        // --- NEW: Remove from Watchlist ---
+        removeFromWatchlist(imdbID) {
+            const list = this.getWatchlist();
+            const filtered = list.filter(e => e.imdbID !== imdbID);
+            this.setWatchlist(filtered);
+        },
+        
+        // --- NEW: Remove from Continue Watching ---
+        removeFromContinue(imdbID) {
+            const list = this.getContinueWatching();
+            const filtered = list.filter(e => e.imdbID !== imdbID);
+            this.setContinueWatching(filtered);
         }
     };
 
-
-// ...
     // Best practice: For dynamically added elements or elements whose event listeners
     // might change, store references to the listener functions and explicitly remove them
     // when the element is no longer needed or its behavior changes, to prevent memory leaks.
@@ -596,11 +608,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
         },
-        createMovieCard(movie) {
+        
+        /**
+         * Creates a clickable movie card element.
+         * @param {Object} movie - Movie/Show data.
+         * @param {boolean} isRemovable - Whether to include a remove button (for watchlist/continue).
+         * @returns {HTMLElement} The movie card div.
+         */
+        createMovieCard(movie, isRemovable = false) { 
             if (!movie) return null;
 
             const movieCard = document.createElement('div');
             movieCard.className = 'movie-card';
+            // Set data attributes for easy identification
+            movieCard.dataset.imdbId = movie.imdbID; 
+            movieCard.dataset.type = movie.Type;
 
             const imageContainer = document.createElement('div');
             imageContainer.className = 'movie-card-image-container';
@@ -629,9 +651,41 @@ document.addEventListener('DOMContentLoaded', () => {
             if (resumeEntry) {
                 const resumeBadge = document.createElement('div');
                 resumeBadge.className = 'resume-badge';
-                resumeBadge.textContent = 'Continue';
+                // Show S/E info for TV shows
+                if (resumeEntry.type === 'series' && resumeEntry.season && resumeEntry.episode) {
+                    resumeBadge.textContent = `Continue S${resumeEntry.season} E${resumeEntry.episode}`;
+                } else {
+                    resumeBadge.textContent = 'Continue Watching';
+                }
                 imageContainer.appendChild(resumeBadge);
             }
+            
+            // --- NEW: Direct Remove Button ---
+            if (isRemovable) {
+                const removeButton = document.createElement('button');
+                removeButton.className = 'remove-button fas fa-times-circle'; // Use Font Awesome icon
+                removeButton.setAttribute('aria-label', `Remove ${movie.Title} from list`);
+                removeButton.title = `Remove ${movie.Title}`;
+                imageContainer.appendChild(removeButton);
+
+                // IMPORTANT: Add listener to remove only on button click, NOT on card click
+                removeButton.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent modal from opening
+                    
+                    // Determine which list to remove from based on the container ID
+                    const grid = movieCard.parentElement.id;
+                    if (grid === 'watchlist-grid') {
+                        storage.removeFromWatchlist(movie.imdbID);
+                        this.renderListSection(watchlistGrid, storage.getWatchlist(), 'Your watchlist is empty. Add movies and shows to see them here!');
+                        watchlistSection.style.display = storage.getWatchlist().length ? 'block' : 'none';
+                    } else if (grid === 'continue-watching-grid') {
+                        storage.removeFromContinue(movie.imdbID);
+                        this.renderListSection(continueWatchingGrid, storage.getContinueWatching(), 'No shows in your continue watching list yet. Start watching something to see it here!');
+                        continueWatchingSection.style.display = storage.getContinueWatching().length ? 'block' : 'none';
+                    }
+                });
+            }
+            // --- END NEW REMOVE BUTTON ---
 
             const body = document.createElement('div');
             body.className = 'movie-card-body';
@@ -645,6 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
             movieCard.appendChild(imageContainer);
             movieCard.appendChild(body);
 
+            // Open modal only on card click, excluding the remove button
             movieCard.addEventListener('click', () => this.openVideoModal(movie.imdbID));
             return movieCard;
         },
@@ -885,13 +940,14 @@ document.addEventListener('DOMContentLoaded', () => {
             loadMorePopularButton.style.display = 'block'; // Ensure it's visible on home view
             popularMoviesPage = 1; // Reset popular movies page
             this.renderPopularMovies(); // Re-render popular movies from start
-            // Render continue and watchlist if present
+            // Render continue and watchlist 
             const cw = storage.getContinueWatching();
-            continueWatchingSection.style.display = cw.length ? 'block' : 'none';
-            if (cw.length) this.renderListSection(continueWatchingGrid, cw);
+            this.renderListSection(continueWatchingGrid, cw, 'No shows in your continue watching list yet. Start watching something to see it here!');
+            continueWatchingSection.style.display = cw.length ? 'block' : 'none'; // Only show if there's content
+            
             const wl = storage.getWatchlist();
-            watchlistSection.style.display = wl.length ? 'block' : 'none';
-            if (wl.length) this.renderListSection(watchlistGrid, wl);
+            this.renderListSection(watchlistGrid, wl, 'Your watchlist is empty. Add movies and shows to see them here!');
+            watchlistSection.style.display = wl.length ? 'block' : 'none'; // Only show if there's content
         },
         showSearchView() {
             // Remove home-page class from body
@@ -952,11 +1008,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
             
             // Open the search in a new tab. 
-            // This is synchronous with the user's click, which is the best way 
-            // to bypass most pop-up blockers.
             const newWindow = window.open(googleUrl, '_blank');
 
-            // Optional check: if window.open returns null, it was likely blocked.
             if (newWindow === null) {
                 console.warn(`[ActorSearch] Popup blocked for: ${actorName}. Prompting user.`);
                 alert(`Your browser blocked the pop-up for "${actorName}" search. Please allow pop-ups for this site, or try searching manually: ${searchQuery}`);
@@ -1321,7 +1374,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (lastFocusedElement) {
-                lastFocusedElement.focus(); // Return focus to the element that opened the modal
+                if (typeof lastFocusedElement.focus === 'function') { // Added defensive check
+                    try {
+                        lastFocusedElement.focus(); // Return focus to the element that opened the modal
+                    } catch (e) {
+                        console.warn("Could not restore focus to element.", e);
+                    }
+                }
                 lastFocusedElement = null;
             }
             document.removeEventListener('keydown', this.handleModalTabKey);
@@ -1391,20 +1450,51 @@ document.addEventListener('DOMContentLoaded', () => {
             return url;
         },
 
-        renderListSection(container, items) {
+        /**
+         * Renders the Watchlist or Continue Watching grid.
+         * @param {HTMLElement} container - The grid element (watchlistGrid or continueWatchingGrid).
+         * @param {Array<Object>} items - The list of items from local storage.
+         * @param {string} emptyMessage - The message to display if the list is empty.
+         */
+        renderListSection(container, items, emptyMessage = 'List is empty.') { 
             container.innerHTML = '';
+            
+            if (items.length === 0) {
+                const p = document.createElement('p');
+                p.style.cssText = 'text-align: center; color: var(--text-light); padding: 2rem; grid-column: 1 / -1;';
+                p.textContent = emptyMessage;
+                container.appendChild(p);
+                
+                // Set display to none for the parent section
+                if (container.id === 'watchlist-grid') {
+                    watchlistSection.style.display = 'none';
+                } else if (container.id === 'continue-watching-grid') {
+                    continueWatchingSection.style.display = 'none';
+                }
+                return;
+            }
+
+            // Set display to block for the parent section if it has content
+            if (container.id === 'watchlist-grid') {
+                watchlistSection.style.display = 'block';
+            } else if (container.id === 'continue-watching-grid') {
+                continueWatchingSection.style.display = 'block';
+            }
+            
+            // Pass true to enable the remove button on the card
             items.forEach(item => {
                 const card = this.createMovieCard({
                     Poster: item.poster,
                     Title: item.title,
                     imdbID: item.imdbID,
-                });
+                    Type: item.type,
+                    // Season/Episode info is handled via the resumeEntry check in createMovieCard
+                }, true); // <--- Passed TRUE to enable REMOVE BUTTON
+
                 if (card) container.appendChild(card);
             });
         },
     };
-// ... rest of the script ...
-
 
     // --- EVENT LISTENERS ---
     // Explicit load more handlers for correctness and clarity
@@ -1486,7 +1576,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (developerMessageModal.style.display === 'flex') {
                 developerMessageModal.style.display = 'none';
                 if (lastFocusedElement) {
-                    lastFocusedElement.focus();
+                    if (typeof lastFocusedElement.focus === 'function') { // Added defensive check
+                        lastFocusedElement.focus();
+                    }
                 }
                 document.removeEventListener('keydown', ui.handleModalTabKey);
             }
@@ -1549,8 +1641,8 @@ document.addEventListener('DOMContentLoaded', () => {
         searchResultsSection.style.display = 'none';
         popularTvShowsSection.style.display = 'none';
         continueWatchingSection.style.display = 'none';
-        watchlistSection.style.display = 'block';
-        ui.renderListSection(watchlistGrid, storage.getWatchlist());
+        // Use new render function and only display section if it has content
+        ui.renderListSection(watchlistGrid, storage.getWatchlist(), 'Your watchlist is empty. Add movies and shows to see them here!');
     });
 
     continueNavLink.addEventListener('click', (e) => {
@@ -1562,8 +1654,8 @@ document.addEventListener('DOMContentLoaded', () => {
         searchResultsSection.style.display = 'none';
         popularTvShowsSection.style.display = 'none';
         watchlistSection.style.display = 'none';
-        continueWatchingSection.style.display = 'block';
-        ui.renderListSection(continueWatchingGrid, storage.getContinueWatching());
+        // Use new render function and only display section if it has content
+        ui.renderListSection(continueWatchingGrid, storage.getContinueWatching(), 'No shows in your continue watching list yet. Start watching something to see it here!');
     });
 
     mobileMoviesNavLink.addEventListener('click', (e) => {
@@ -1608,8 +1700,8 @@ document.addEventListener('DOMContentLoaded', () => {
         searchResultsSection.style.display = 'none';
         popularTvShowsSection.style.display = 'none';
         continueWatchingSection.style.display = 'none';
-        watchlistSection.style.display = 'block';
-        ui.renderListSection(watchlistGrid, storage.getWatchlist());
+        // Use new render function and only display section if it has content
+        ui.renderListSection(watchlistGrid, storage.getWatchlist(), 'Your watchlist is empty. Add movies and shows to see them here!');
     });
 
     mobileContinueNavLink.addEventListener('click', (e) => {
@@ -1622,8 +1714,8 @@ document.addEventListener('DOMContentLoaded', () => {
         searchResultsSection.style.display = 'none';
         popularTvShowsSection.style.display = 'none';
         watchlistSection.style.display = 'none';
-        continueWatchingSection.style.display = 'block';
-        ui.renderListSection(continueWatchingGrid, storage.getContinueWatching());
+        // Use new render function and only display section if it has content
+        ui.renderListSection(continueWatchingGrid, storage.getContinueWatching(), 'No shows in your continue watching list yet. Start watching something to see it here!');
     });
 
     // --- Notification Logic ---
@@ -1699,6 +1791,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentOpenImdbId) return;
         const title = document.getElementById('modal-movie-title').textContent;
         const poster = document.getElementById('modal-movie-poster').src;
+        // Determine the media type from the poster URL, or default to movie/series logic if possible
+        // For simplicity, we assume if it's currently open, it must be either a 'movie' or 'series'
+        const type = seasonEpisodeSelector.style.display === 'block' ? 'series' : 'movie'; 
+        
         const list = storage.getWatchlist();
         const idx = list.findIndex(i => i.imdbID === currentOpenImdbId);
         if (idx >= 0) {
@@ -1708,22 +1804,23 @@ document.addEventListener('DOMContentLoaded', () => {
             watchlistToggle.classList.remove('active');
             watchlistToggle.querySelector('.watchlist-toggle-text').textContent = 'Add to Watchlist';
         } else {
-            list.unshift({ imdbID: currentOpenImdbId, title, poster });
+            list.unshift({ imdbID: currentOpenImdbId, title, poster, type });
             storage.setWatchlist(list.slice(0, 100));
             watchlistToggle.setAttribute('aria-pressed', 'true');
             watchlistToggle.classList.add('active');
             watchlistToggle.querySelector('.watchlist-toggle-text').textContent = 'Remove from Watchlist';
         }
         // Refresh watchlist section if visible
-        ui.renderListSection(watchlistGrid, storage.getWatchlist());
-        watchlistSection.style.display = storage.getWatchlist().length ? 'block' : 'none';
+        ui.renderListSection(watchlistGrid, storage.getWatchlist(), 'Your watchlist is empty. Add movies and shows to see them here!');
     });
 
 
     closeDeveloperMessageModal.addEventListener('click', () => {
         developerMessageModal.style.display = 'none';
         if (lastFocusedElement) {
-            lastFocusedElement.focus();
+            if (typeof lastFocusedElement.focus === 'function') {
+                lastFocusedElement.focus();
+            }
         }
         document.removeEventListener('keydown', ui.handleModalTabKey);
     });
@@ -1732,7 +1829,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target === developerMessageModal) {
             developerMessageModal.style.display = 'none';
             if (lastFocusedElement) {
-                lastFocusedElement.focus();
+                if (typeof lastFocusedElement.focus === 'function') {
+                    lastFocusedElement.focus();
+                }
             }
             document.removeEventListener('keydown', ui.handleModalTabKey);
         }
@@ -1751,26 +1850,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Continue watching and watchlist
         const continueList = storage.getContinueWatching();
-        // Continue watching list
-        if (continueList.length) {
-            continueWatchingSection.style.display = 'block';
-            ui.renderListSection(continueWatchingGrid, continueList);
-        } else {
-            // Show continue watching section even if empty for better UX
-            continueWatchingSection.style.display = 'block';
-            continueWatchingGrid.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">No shows in your continue watching list yet. Start watching something to see it here!</p>';
-        }
-        
         const watchList = storage.getWatchlist();
-        // Watchlist
-        if (watchList.length) {
-            watchlistSection.style.display = 'block';
-            ui.renderListSection(watchlistGrid, watchList);
-        } else {
-            // Show watchlist section even if empty for better UX
-            watchlistSection.style.display = 'block';
-            watchlistGrid.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">Your watchlist is empty. Add movies and shows to see them here!</p>';
-        }
+
+        // Continue watching list: Use new rendering function
+        ui.renderListSection(
+            continueWatchingGrid, 
+            continueList, 
+            'No shows in your continue watching list yet. Start watching something to see it here!'
+        );
+        // Show the parent section only if the list has content.
+        continueWatchingSection.style.display = continueList.length ? 'block' : 'none';
+        
+        // Watchlist: Use new rendering function
+        ui.renderListSection(
+            watchlistGrid, 
+            watchList, 
+            'Your watchlist is empty. Add movies and shows to see them here!'
+        );
+        // Show the parent section only if the list has content.
+        watchlistSection.style.display = watchList.length ? 'block' : 'none';
 
         ui.renderPopularMovies();
         ui.renderNews();
