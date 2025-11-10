@@ -376,6 +376,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+
+// ...
     // Best practice: For dynamically added elements or elements whose event listeners
     // might change, store references to the listener functions and explicitly remove them
     // when the element is no longer needed or its behavior changes, to prevent memory leaks.
@@ -945,12 +947,20 @@ document.addEventListener('DOMContentLoaded', () => {
          * @param {string} actorName - The name of the actor to search for.
          */
         searchActorFilmography(actorName) {
-            // Construct the Google search query
-            const searchQuery = `movies and tv shows starring ${actorName}`;
+            // Updated search query to directly match the desired format: "[Actor Name] movies"
+            const searchQuery = `${actorName} movies`;
             const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
             
-            // Open the search in a new tab
-            window.open(googleUrl, '_blank');
+            // Open the search in a new tab. 
+            // This is synchronous with the user's click, which is the best way 
+            // to bypass most pop-up blockers.
+            const newWindow = window.open(googleUrl, '_blank');
+
+            // Optional check: if window.open returns null, it was likely blocked.
+            if (newWindow === null) {
+                console.warn(`[ActorSearch] Popup blocked for: ${actorName}. Prompting user.`);
+                alert(`Your browser blocked the pop-up for "${actorName}" search. Please allow pop-ups for this site, or try searching manually: ${searchQuery}`);
+            }
 
             console.log(`[ActorSearch] Triggered Google search for: ${actorName}`);
         },
@@ -1393,6 +1403,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         },
     };
+// ... rest of the script ...
+
 
     // --- EVENT LISTENERS ---
     // Explicit load more handlers for correctness and clarity
