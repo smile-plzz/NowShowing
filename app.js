@@ -899,6 +899,62 @@ document.addEventListener('DOMContentLoaded', () => {
             searchResultsSection.style.display = 'block';
             popularTvShowsSection.style.display = 'none';
         },
+        
+        /**
+         * Converts the comma-separated actor string into a list of clickable <a> tags.
+         * @param {string} actorsString - The raw string of actors (e.g., "Tom Hanks, Leonardo DiCaprio").
+         * @returns {HTMLElement} A <span> element containing the clickable actor links.
+         */
+        createClickableActorsList(actorsString) {
+            const container = document.createElement('span');
+            container.className = 'actor-list-container';
+            
+            if (!actorsString || actorsString === 'N/A') {
+                container.textContent = 'N/A';
+                return container;
+            }
+
+            const actorsArray = actorsString.split(',').map(name => name.trim()).filter(name => name.length > 0);
+            
+            actorsArray.forEach((actorName, index) => {
+                const actorLink = document.createElement('a');
+                actorLink.href = '#'; // Use '#' since the actual action is in the click handler
+                actorLink.className = 'actor-link';
+                actorLink.textContent = actorName;
+                actorLink.setAttribute('aria-label', `Search for movies starring ${actorName}`);
+
+                // The Core Logic: Open a Google Search on click
+                actorLink.addEventListener('click', (e) => {
+                    e.preventDefault(); // Stop the default anchor link behavior
+                    this.searchActorFilmography(actorName);
+                });
+
+                container.appendChild(actorLink);
+
+                // Add a comma and space separator if it's not the last actor
+                if (index < actorsArray.length - 1) {
+                    container.appendChild(document.createTextNode(', '));
+                }
+            });
+
+            return container;
+        },
+
+        /**
+         * Opens a new window/tab to perform a Google search for the actor's filmography.
+         * @param {string} actorName - The name of the actor to search for.
+         */
+        searchActorFilmography(actorName) {
+            // Construct the Google search query
+            const searchQuery = `movies and tv shows starring ${actorName}`;
+            const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+            
+            // Open the search in a new tab
+            window.open(googleUrl, '_blank');
+
+            console.log(`[ActorSearch] Triggered Google search for: ${actorName}`);
+        },
+
         async openVideoModal(imdbID) {
             sourceButtonsContainer.innerHTML = '';
             videoPlayer.src = ''; // Clear previous video
@@ -941,7 +997,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 modalPoster.alt = `${details.Title} Poster`;
                 document.getElementById('modal-movie-director').textContent = details.Director;
                 document.getElementById('modal-movie-writer').textContent = details.Writer;
-                document.getElementById('modal-movie-actors').textContent = details.Actors;
+                
+                // --- MODIFIED SECTION FOR CLICKABLE ACTORS ---
+                const actorsElement = document.getElementById('modal-movie-actors');
+                actorsElement.innerHTML = ''; // Clear existing content
+                // Now append the list of clickable actor names
+                actorsElement.appendChild(this.createClickableActorsList(details.Actors));
+                // ---------------------------------------------
+                
                 document.getElementById('modal-movie-awards').textContent = details.Awards;
                 document.getElementById('modal-movie-runtime').textContent = details.Runtime;
                 document.getElementById('modal-movie-language').textContent = details.Language;
