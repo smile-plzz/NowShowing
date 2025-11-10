@@ -147,6 +147,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastFocusedElement = null; // To store the element that had focus before modal opened
     let currentOpenImdbId = null;
 
+    // --- NEW: Global cache for recommendation generation ---
+    let globalMovieCache = []; 
+
     const videoSources = [
         { name: 'VidCloud', url: 'https://vidcloud.stream/', tvUrl: 'https://vidcloud.stream/' },
         { name: 'fsapi.xyz', url: 'https://fsapi.xyz/movie/', tvUrl: 'https://fsapi.xyz/tv-imdb/' },
@@ -677,11 +680,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (grid === 'watchlist-grid') {
                         storage.removeFromWatchlist(movie.imdbID);
                         this.renderListSection(watchlistGrid, storage.getWatchlist(), 'Your watchlist is empty. Add movies and shows to see them here!');
-                        watchlistSection.style.display = storage.getWatchlist().length ? 'block' : 'none';
                     } else if (grid === 'continue-watching-grid') {
                         storage.removeFromContinue(movie.imdbID);
                         this.renderListSection(continueWatchingGrid, storage.getContinueWatching(), 'No shows in your continue watching list yet. Start watching something to see it here!');
-                        continueWatchingSection.style.display = storage.getContinueWatching().length ? 'block' : 'none';
                     }
                 });
             }
@@ -731,6 +732,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     container.appendChild(movieCard);
                 }
             });
+
+            // --- NEW: Populate Global Cache for Home Views Only ---
+            if (container.id === 'popular-movies' && !append) {
+                // Clear and rebuild cache only on initial load, not load more
+                globalMovieCache = []; 
+            }
+            if (container.id === 'popular-movies' || container.id === 'popular-tv-shows') {
+                // Add valid movies to the global cache (only non-fallback, non-search results)
+                movies.filter(m => !m.Title.startsWith('Movie ') && m.Response !== 'False').forEach(m => {
+                    if (!globalMovieCache.some(c => c.imdbID === m.imdbID)) {
+                        globalMovieCache.push(m);
+                    }
+                });
+            }
+            // --- END NEW CACHE LOGIC ---
 
             if (loadMoreButton) {
                 let hasMore = false;
@@ -943,11 +959,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Render continue and watchlist 
             const cw = storage.getContinueWatching();
             this.renderListSection(continueWatchingGrid, cw, 'No shows in your continue watching list yet. Start watching something to see it here!');
-            continueWatchingSection.style.display = cw.length ? 'block' : 'none'; // Only show if there's content
             
             const wl = storage.getWatchlist();
             this.renderListSection(watchlistGrid, wl, 'Your watchlist is empty. Add movies and shows to see them here!');
-            watchlistSection.style.display = wl.length ? 'block' : 'none'; // Only show if there's content
         },
         showSearchView() {
             // Remove home-page class from body
@@ -1017,6 +1031,69 @@ document.addEventListener('DOMContentLoaded', () => {
 
             console.log(`[ActorSearch] Triggered Google search for: ${actorName}`);
         },
+        
+        /**
+         * Logic to find up to 4 simple recommendations based on shared genres.
+         * @param {string} currentImdbID - The IMDB ID of the currently open title.
+         * @param {string} currentGenres - Comma-separated genre string (e.g., "Action, Sci-Fi").
+         * @returns {Array<Object>} List of recommended movie/show objects.
+         */
+        fetchSimpleRecommendations(currentImdbID, currentGenres) {
+            if (!currentGenres || currentGenres === 'N/A') return [];
+
+            const mainGenres = currentGenres.split(',').map(g => g.trim().toLowerCase());
+            const recommendations = [];
+            
+            // Iterate over the cached list of movies/shows on the homepage
+            for (const movie of globalMovieCache) {
+                // 1. Skip the current movie itself
+                if (movie.imdbID === currentImdbID) continue;
+                
+                // 2. Check for genre match
+                if (movie.Genre && movie.Genre !== 'N/A') {
+                    const movieGenres = movie.Genre.split(',').map(g => g.trim().toLowerCase());
+                    const hasSharedGenre = movieGenres.some(g => mainGenres.includes(g));
+
+                    if (hasSharedGenre) {
+                        recommendations.push(movie);
+                        if (recommendations.length >= 4) { // Limit to 4 recommendations
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            return recommendations;
+        },
+
+        /**
+         * Renders the recommendation section in the modal.
+         * @param {string} imdbID - The IMDB ID of the currently open title.
+         * @param {string} genres - The genre string of the currently open title.
+         */
+        renderRecommendations(imdbID, genres) {
+            const container = document.getElementById('recommendations-grid');
+            const section = document.getElementById('recommendations-section');
+            if (!container || !section) return; // Defensive check for missing HTML
+
+            container.innerHTML = '';
+            section.style.display = 'none';
+
+            const recommendations = this.fetchSimpleRecommendations(imdbID, genres);
+
+            if (recommendations.length > 0) {
+                recommendations.forEach(movie => {
+                    // Note: Since movies in cache only have search-level data (Title, Year, Poster, imdbID, Type) 
+                    // and not the detailed genre/plot, we are relying on the *cached* Genre property 
+                    // from the initial popular movie fetch, which should be present.
+                    const card = this.createMovieCard(movie, false); 
+                    if (card) {
+                        container.appendChild(card);
+                    }
+                });
+                section.style.display = 'block';
+            }
+        },
 
         async openVideoModal(imdbID) {
             sourceButtonsContainer.innerHTML = '';
@@ -1076,6 +1153,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('modal-movie-boxoffice').textContent = details.BoxOffice;
                 document.getElementById('modal-movie-production').textContent = details.Production;
                 document.getElementById('modal-movie-website').textContent = details.Website;
+                
+                // --- NEW: Render Recommendations ---
+                this.renderRecommendations(details.imdbID, details.Genre);
+                // -----------------------------------
 
                 // Setup watchlist toggle state
                 const watchlist = storage.getWatchlist();
@@ -1363,6 +1444,10 @@ document.addEventListener('DOMContentLoaded', () => {
             videoAvailabilityStatus.style.display = 'none'; // Hide status when modal is closed
             videoPlayOverlay.style.display = 'none'; // Hide play overlay when modal is closed
 
+            // Hide recommendation section
+            const section = document.getElementById('recommendations-section');
+            if (section) section.style.display = 'none';
+
             // Remove event listeners to prevent memory leaks
             if (seasonSelect && ui.currentSeasonChangeListener) {
                 seasonSelect.removeEventListener('change', ui.currentSeasonChangeListener);
@@ -1488,7 +1573,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     Title: item.title,
                     imdbID: item.imdbID,
                     Type: item.type,
-                    // Season/Episode info is handled via the resumeEntry check in createMovieCard
+                    // Note: Cards for lists don't need full OMDb data, so we don't pass Genre here.
                 }, true); // <--- Passed TRUE to enable REMOVE BUTTON
 
                 if (card) container.appendChild(card);
@@ -1858,8 +1943,6 @@ document.addEventListener('DOMContentLoaded', () => {
             continueList, 
             'No shows in your continue watching list yet. Start watching something to see it here!'
         );
-        // Show the parent section only if the list has content.
-        continueWatchingSection.style.display = continueList.length ? 'block' : 'none';
         
         // Watchlist: Use new rendering function
         ui.renderListSection(
@@ -1867,8 +1950,6 @@ document.addEventListener('DOMContentLoaded', () => {
             watchList, 
             'Your watchlist is empty. Add movies and shows to see them here!'
         );
-        // Show the parent section only if the list has content.
-        watchlistSection.style.display = watchList.length ? 'block' : 'none';
 
         ui.renderPopularMovies();
         ui.renderNews();
