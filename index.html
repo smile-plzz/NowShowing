@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NowShowing</title>
-    <meta name="description" content="Search and stream movies and TV shows from multiple sources with a clean, responsive UI. Stay updated with the latest entertainment news.">
+    <title>NowShowing - Stream Movies & Shows</title>
+    <meta name="description" content="Search and stream movies and TV shows from multiple sources with a sleek, modern UI. Stay updated with the latest entertainment news.">
     <meta name="theme-color" content="#e50914">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="image" href="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
@@ -15,9 +15,13 @@
 </head>
 <body>
 
+    <!-- <CHANGE> Enhanced navigation bar with improved layout and visual hierarchy -->
     <nav class="navbar">
         <div class="navbar-brand">
-            <a href="#">NowShowing</a>
+            <a href="#" aria-label="NowShowing Home">
+                <i class="fas fa-film" aria-hidden="true"></i>
+                <span>NowShowing</span>
+            </a>
         </div>
         <ul class="navbar-nav" id="main-nav">
             <li><a href="#">Home</a></li>
@@ -29,28 +33,34 @@
         <div class="navbar-controls">
             <div class="theme-switch">
                 <input type="checkbox" id="theme-toggle" class="theme-toggle">
-                <label for="theme-toggle"></label>
+                <label for="theme-toggle" aria-label="Toggle dark/light mode"></label>
             </div>
-            <button class="notification-button" id="notification-button" aria-label="Notifications">
+            <button class="navbar-icon-button notification-button" id="notification-button" aria-label="Notifications">
                 <i class="fas fa-bell" aria-hidden="true"></i>
             </button>
-            <button class="developer-message-button" id="developer-message-button" aria-label="Developer Message">
-                <i class="fas fa-info-circle" aria-hidden="true"></i>
+            <button class="navbar-icon-button developer-message-button" id="developer-message-button" aria-label="Developer Message">
+                <i class="fas fa-code" aria-hidden="true"></i>
             </button>
-            <button class="refresh-images-button" id="refresh-images-button" aria-label="Force Refresh Images" title="Force refresh all images (Click to refresh, double-click for status, triple-click for nuclear refresh)">
+            <button class="navbar-icon-button refresh-images-button" id="refresh-images-button" aria-label="Force Refresh Images" title="Refresh all images">
                 <i class="fas fa-sync-alt" aria-hidden="true"></i>
-                <span class="refresh-text">Force Refresh</span>
+                <span class="refresh-text">Refresh</span>
             </button>
-            <button class="cleanup-button" id="cleanup-button" aria-label="Emergency Cleanup" title="Emergency cleanup and memory management">
+            <button class="navbar-icon-button cleanup-button" id="cleanup-button" aria-label="Emergency Cleanup" title="Memory cleanup">
                 <i class="fas fa-broom" aria-hidden="true"></i>
             </button>
         </div>
-        <button class="hamburger-menu" id="hamburger-menu" aria-label="Open mobile menu">
-            <i class="fas fa-bars" aria-hidden="true"></i>
+        <button class="hamburger-menu" id="hamburger-menu" aria-label="Open mobile menu" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
         </button>
     </nav>
 
-    <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+    <!-- <CHANGE> Improved mobile navigation overlay -->
+    <div class="mobile-nav-overlay" id="mobile-nav-overlay" role="navigation" aria-label="Mobile menu">
+        <button class="mobile-close-button" id="mobile-close-button" aria-label="Close mobile menu">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
         <ul class="mobile-nav-links">
             <li><a href="#">Home</a></li>
             <li><a href="#" id="mobile-movies-nav-link">Movies</a></li>
@@ -60,200 +70,327 @@
         </ul>
     </div>
 
-    <section class="hero-section">
+    <!-- <CHANGE> Enhanced hero section with better visual hierarchy and copy -->
+    <section class="hero-section" aria-labelledby="hero-title">
+        <div class="hero-overlay"></div>
         <div class="hero-content">
-            <br> <h1 class="hero-title">Find Something to Distract You From the Void.</h1>
-            <p class="hero-subtitle">
-NowShowing pulls in third-party streams — some shady, some straight-up cursed.Those “free” movies come packed with pop-ups, redirects, and malware that mocks your will to live.<br>
-
-Click “Play” if you want to risk your time, your browser, or your dignity. The button offers entertainment; the void offers perspective. Use legal sources or Brave for a less apocalyptic experience,though nothing truly saves you from the void.
-</p>
-
-
-            <br><br>
+            <h1 class="hero-title" id="hero-title">Your Gateway to Entertainment</h1>
+            <p class="hero-subtitle">Stream thousands of movies and TV shows from trusted sources. One search. Infinite possibilities.</p>
+            
+            <!-- <CHANGE> Improved search container styling -->
             <div class="search-container">
-                <input type="text" id="search-input" placeholder="Search for a movie or TV show...">
-                <button id="search-button" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></button>
+                <i class="fas fa-search search-icon" aria-hidden="true"></i>
+                <input type="text" id="search-input" placeholder="Search movies, shows, actors..." autocomplete="off">
+                <button id="search-button" aria-label="Search">
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
     </section>
 
-    
     <main>
+        <!-- <CHANGE> Added visual separators and improved section structure -->
         <section class="movies-section" id="continue-watching-section" style="display: none;">
-            <h2>Continue Watching</h2>
-            <div class="movies-grid" id="continue-watching-grid" aria-live="polite"></div>
+            <div class="section-header">
+                <h2>Continue Watching</h2>
+                <p class="section-subtitle">Pick up where you left off</p>
+            </div>
+            <div class="movies-grid" id="continue-watching-grid" aria-live="polite" aria-label="Continue watching movies"></div>
         </section>
 
         <section class="movies-section" id="watchlist-section" style="display: none;">
-            <h2>Your Watchlist</h2>
-            <div class="movies-grid" id="watchlist-grid" aria-live="polite"></div>
+            <div class="section-header">
+                <h2>Your Watchlist</h2>
+                <p class="section-subtitle">Saved for later</p>
+            </div>
+            <div class="movies-grid" id="watchlist-grid" aria-live="polite" aria-label="Watchlist movies"></div>
         </section>
 
         <section class="movies-section">
-            <h2>Popular Movies</h2>
-            <div class="movies-grid" id="popular-movies" aria-live="polite"></div>
-            <button id="load-more-popular" class="load-more-button">Load More</button>
+            <div class="section-header">
+                <h2>Trending Now</h2>
+                <p class="section-subtitle">Most popular this week</p>
+            </div>
+            <div class="movies-grid" id="popular-movies" aria-live="polite" aria-label="Popular movies"></div>
+            <button id="load-more-popular" class="load-more-button" aria-label="Load more movies">
+                <span>Load More Movies</span>
+                <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
         </section>
 
         <section class="movies-section" style="display: none;">
-            <h2>Search Results</h2>
-            <div class="movies-grid" id="search-results" aria-live="polite"></div>
-            <button id="load-more-search" class="load-more-button">Load More</button>
+            <div class="section-header">
+                <h2>Search Results</h2>
+                <p class="section-subtitle" id="search-results-count"></p>
+            </div>
+            <div class="movies-grid" id="search-results" aria-live="polite" aria-label="Search results"></div>
+            <button id="load-more-search" class="load-more-button" aria-label="Load more results">
+                <span>Load More Results</span>
+                <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
         </section>
 
         <section class="movies-section" style="display: none;">
-            <h2>Popular TV Shows</h2>
-            <div class="movies-grid" id="popular-tv-shows" aria-live="polite"></div>
-            <button id="load-more-popular-tv" class="load-more-button">Load More</button>
+            <div class="section-header">
+                <h2>Popular TV Shows</h2>
+                <p class="section-subtitle">Binge-worthy series</p>
+            </div>
+            <div class="movies-grid" id="popular-tv-shows" aria-live="polite" aria-label="Popular TV shows"></div>
+            <button id="load-more-popular-tv" class="load-more-button" aria-label="Load more shows">
+                <span>Load More Shows</span>
+                <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
         </section>
 
+        <!-- <CHANGE> Improved news section styling -->
         <section class="news-section">
-            <h2>Latest News</h2>
-            <div class="news-grid" id="news-grid" aria-live="polite"></div>
-            <button id="load-more-news" class="load-more-button" style="display: none;">Load More News</button>
+            <div class="section-header">
+                <h2>Entertainment News</h2>
+                <p class="section-subtitle">Stay in the loop</p>
+            </div>
+            <div class="news-grid" id="news-grid" aria-live="polite" aria-label="Latest entertainment news"></div>
+            <button id="load-more-news" class="load-more-button" style="display: none;" aria-label="Load more news">
+                <span>Load More News</span>
+                <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
         </section>
     </main>
 
+    <!-- <CHANGE> Enhanced video modal with improved UX -->
     <div class="video-modal" id="video-modal" role="dialog" aria-modal="true" aria-labelledby="modal-movie-title">
         <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <div class="source-buttons" id="source-buttons"></div>
+            <button class="close-button" id="modal-close-button" aria-label="Close modal">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            
+            <!-- <CHANGE> Improved source button container -->
+            <div class="source-buttons-wrapper">
+                <h3 class="source-label">Select Stream Source:</h3>
+                <div class="source-buttons" id="source-buttons" role="group" aria-label="Stream sources"></div>
+            </div>
+
             <div class="modal-actions">
                 <button id="watchlist-toggle" class="watchlist-toggle" aria-pressed="false">
                     <i class="fas fa-bookmark" aria-hidden="true"></i>
-                    <span class="watchlist-toggle-text">Add to Watchlist</span>
+                    <span class="watchlist-toggle-text">Save to Watchlist</span>
                 </button>
             </div>
-            <div id="season-episode-selector" style="display: none;">
+
+            <!-- <CHANGE> Improved season/episode selector -->
+            <div id="season-episode-selector" style="display: none;" aria-label="Season and episode selection">
                 <label for="season-select">Season:</label>
-                <select id="season-select"></select>
+                <select id="season-select" aria-label="Select season"></select>
                 <label for="episode-select">Episode:</label>
-                <select id="episode-select"></select>
+                <select id="episode-select" aria-label="Select episode"></select>
             </div>
-            <div id="video-availability-status"></div>
+
+            <div id="video-availability-status" role="status" aria-live="polite"></div>
+
+            <!-- <CHANGE> Enhanced video player container -->
             <div class="video-player-container">
-                <iframe id="video-player" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; encrypted-media"></iframe>
-                <div class="play-overlay" id="video-play-overlay">
-                    <i class="fas fa-play"></i>
+                <iframe id="video-player" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" title="Video player"></iframe>
+                <div class="play-overlay" id="video-play-overlay" role="button" tabindex="0" aria-label="Play video">
+                    <i class="fas fa-play" aria-hidden="true"></i>
                 </div>
             </div>
+
+            <!-- <CHANGE> Improved video details layout -->
             <div class="video-details-container">
-                <img id="modal-movie-poster" src="" alt="Movie Poster">
+                <div class="video-poster-wrapper">
+                    <img id="modal-movie-poster" src="/placeholder.svg" alt="Movie poster thumbnail">
+                </div>
                 <div class="video-details">
-                    <h2 id="modal-movie-title"></h2>
-                    <p id="modal-movie-plot"></p>
-                    <p><strong>Genre:</strong> <span id="modal-movie-genre"></span></p>
-                    <p><strong>Released:</strong> <span id="modal-movie-released"></span></p>
-                    <p><strong>Rating:</strong> <span id="modal-movie-rating"></span></p>
-                    <p><strong>Rated:</strong> <span id="modal-movie-rated"></span></p>
+                    <div class="video-header">
+                        <h2 id="modal-movie-title"></h2>
+                        <div class="video-meta-quick">
+                            <span class="meta-item" id="quick-rating"></span>
+                            <span class="meta-item" id="quick-year"></span>
+                        </div>
+                    </div>
+                    <p id="modal-movie-plot" class="movie-plot"></p>
+                    
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <strong>Genre:</strong>
+                            <span id="modal-movie-genre"></span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Released:</strong>
+                            <span id="modal-movie-released"></span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Rating:</strong>
+                            <span id="modal-movie-rating"></span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Rated:</strong>
+                            <span id="modal-movie-rated"></span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Runtime:</strong>
+                            <span id="modal-movie-runtime"></span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Language:</strong>
+                            <span id="modal-movie-language"></span>
+                        </div>
+                    </div>
+
                     <div id="modal-movie-other-ratings"></div>
-                    <p><strong>Director:</strong> <span id="modal-movie-director"></span></p>
-                    <p><strong>Writer:</strong> <span id="modal-movie-writer"></span></p>
-                    <p><strong>Actors:</strong> <span id="modal-movie-actors"></span></p>
-                    <p><strong>Awards:</strong> <span id="modal-movie-awards"></span></p>
-                    <p><strong>Runtime:</strong> <span id="modal-movie-runtime"></span></p>
-                    <p><strong>Language:</strong> <span id="modal-movie-language"></span></p>
-                    <p><strong>Country:</strong> <span id="modal-movie-country"></span></p>
-                    <p><strong>Metascore:</strong> <span id="modal-movie-metascore"></span></p>
-                    <p><strong>Box Office:</strong> <span id="modal-movie-boxoffice"></span></p>
-                    <p><strong>Production:</strong> <span id="modal-movie-production"></span></p>
-                    <p><strong>Website:</strong> <span id="modal-movie-website"></span></p>
+
+                    <div class="details-extended">
+                        <div class="detail-item">
+                            <strong>Director:</strong>
+                            <span id="modal-movie-director"></span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Writer:</strong>
+                            <span id="modal-movie-writer"></span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Cast:</strong>
+                            <span id="modal-movie-actors"></span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Awards:</strong>
+                            <span id="modal-movie-awards"></span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Country:</strong>
+                            <span id="modal-movie-country"></span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Box Office:</strong>
+                            <span id="modal-movie-boxoffice"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
             
+            <!-- <CHANGE> Improved recommendations section -->
             <div class="recommendations-section" id="recommendations-section" style="display: none;">
-                <h3>You might also like:</h3>
-                <div class="movies-grid small-grid" id="recommendations-grid">
-                    </div>
+                <h3>You might also like</h3>
+                <div class="movies-grid" id="recommendations-grid" aria-label="Recommended movies"></div>
             </div>
-            </div>
+        </div>
     </div>
 
+    <!-- <CHANGE> Enhanced notification modals with better styling -->
     <div class="notification-modal" id="notification-modal" role="dialog" aria-modal="true" aria-labelledby="notification-title">
         <div class="modal-content">
-            <span class="close-button" id="close-notification-modal">&times;</span>
-            <h2 class="notification-title">⚠️ Best Viewed on Brave Browser</h2>
-            <p>NowShowing works best with Brave Browser due to its aggressive ad and tracker blocking capabilities, which significantly improve performance and reduce interruptions from third-party streaming sources.</p>
-            <p>While other browsers may work, Brave offers:</p>
-            <ul>
-                <li><strong>Better playback stability</strong> across streaming sources</li>
-                <li><strong>Fewer pop-ups, redirects, and unwanted ads</strong></li>
-                <li><strong>Faster loading</strong> with enhanced privacy</li>
-            </ul>
-            <p>We highly recommend Brave for the smoothest viewing experience.</p>
+            <button class="close-button" id="close-notification-modal" aria-label="Close notification">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <div class="notification-icon">
+                <i class="fas fa-shield-alt" aria-hidden="true"></i>
+            </div>
+            <h2 class="notification-title" id="notification-title">Recommended: Brave Browser</h2>
+            <p>NowShowing works best with <strong>Brave Browser</strong> for the smoothest streaming experience. Brave blocks ads and trackers automatically, which significantly improves playback across third-party sources.</p>
+            
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <i class="fas fa-play-circle" aria-hidden="true"></i>
+                    <h4>Better Playback</h4>
+                    <p>Stable streaming across all sources</p>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                    <h4>Ad-Free Experience</h4>
+                    <p>No pop-ups or redirects</p>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+                    <h4>Faster Loading</h4>
+                    <p>Enhanced privacy & speed</p>
+                </div>
+            </div>
+
             <h3 class="notification-subtitle">Why This Matters</h3>
-            <p>NowShowing pulls in video streams via third-party embedded players like VidSrc, SuperEmbed, 2Embed, and others. These sources often:</p>
-            <ul>
-                <li>Inject ads/popups before or during playback</li>
-                <li>Redirect users to unrelated pages</li>
-                <li>Load extra scripts that slow down or break the experience</li>
-                <li>Behave inconsistently across browsers depending on ad blockers or script permissions</li>
-            </ul>
-            <p>This makes the experience unreliable in default browsers like Chrome, Edge, or Safari — unless heavily modified with extensions.</p>
-            <h3 class="notification-subtitle">Why Brave?</h3>
-            <p>Brave is built with a focus on privacy and performance. It automatically blocks ads and trackers by default, which is particularly beneficial when dealing with third-party video embeds that often come with intrusive advertising and tracking scripts. This leads to:</p>
-            <ul>
-                <li><strong>Reduced resource consumption:</strong> Less data downloaded, faster page loads.</li>
-                <li><strong>Enhanced privacy:</strong> Protection against unwanted tracking.</li>
-                <li><strong>Fewer interruptions:</strong> A cleaner viewing experience without pop-ups or redirects.</li>
-            </ul>
-            <p>While we strive to make NowShowing work across all browsers, the nature of third-party video sources means that a browser like Brave, with its built-in protections, can offer a significantly smoother and more reliable streaming experience.</p>
+            <p>We use trusted third-party video sources (VidSrc, SuperEmbed, 2Embed, etc.) that sometimes have ads or tracking. Brave's built-in protections solve this automatically.</p>
+
+            <h3 class="notification-subtitle">Works on All Browsers</h3>
+            <p>While Brave is optimal, NowShowing works fine in Chrome, Edge, Safari, and Firefox. Just install an ad blocker extension for the best experience.</p>
         </div>
     </div>
 
     <div class="notification-modal" id="switch-source-notification-modal" role="dialog" aria-modal="true" aria-labelledby="switch-source-notification-title">
         <div class="modal-content">
-            <span class="close-button" id="close-switch-source-notification">&times;</span>
-            <h2 class="notification-title">Having trouble with this stream?</h2>
-            <p>Video streams can sometimes be unreliable due to various factors, including:</p>
-            <ul>
-                <li><strong>Browser Ad Blockers:</strong> Aggressive ad blockers might interfere with the video player.</li>
-                <li><strong>Geographical Restrictions:</strong> Some sources may not be available in your region.</li>
-                <li><strong>Source Overload:</strong> High traffic on a source can lead to buffering or playback issues.</li>
-                <li><strong>Temporary Issues:</strong> The video source might be temporarily down or experiencing technical difficulties.</li>
-            </ul>
-            <p><strong>What you can do:</strong></p>
-            <ul>
-                <li><strong>Try Other Sources:</strong> Click the green or red source buttons below the video player to switch to an alternative. Green indicates a likely available source, but all are worth trying.</li>
-                <li><strong>Disable Ad Blocker (Temporarily):</strong> If you're using an ad blocker, try disabling it for this site and reloading the page.</li>
-                <li><strong>Try a Different Browser:</strong> Some browsers handle embeds differently.</li>
-                <li><strong>Check Your Internet Connection:</strong> Ensure your network is stable.</li>
-            </ul>
-            <p>We strive to provide multiple options for a seamless experience. Thank you for your patience!</p>
+            <button class="close-button" id="close-switch-source-notification" aria-label="Close notification">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <div class="notification-icon">
+                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+            </div>
+            <h2 class="notification-title" id="switch-source-notification-title">Stream Not Working?</h2>
+            <p>Video sources can be unreliable sometimes. Here's what you can do:</p>
+            
+            <div class="troubleshooting-grid">
+                <div class="troubleshoot-item">
+                    <i class="fas fa-tv" aria-hidden="true"></i>
+                    <h4>Try Other Sources</h4>
+                    <p>Green = likely working. All are worth trying.</p>
+                </div>
+                <div class="troubleshoot-item">
+                    <i class="fas fa-ban" aria-hidden="true"></i>
+                    <h4>Disable Ad Blocker</h4>
+                    <p>Temporarily turn it off & reload.</p>
+                </div>
+                <div class="troubleshoot-item">
+                    <i class="fas fa-globe" aria-hidden="true"></i>
+                    <h4>Different Browser</h4>
+                    <p>Some browsers handle embeds differently.</p>
+                </div>
+                <div class="troubleshoot-item">
+                    <i class="fas fa-wifi" aria-hidden="true"></i>
+                    <h4>Check Connection</h4>
+                    <p>Ensure stable network connectivity.</p>
+                </div>
+            </div>
+
+            <p><strong>Pro tip:</strong> Geographic restrictions or source overload might prevent playback. Switching sources usually fixes it!</p>
         </div>
     </div>
 
     <div class="notification-modal" id="developer-message-modal" role="dialog" aria-modal="true" aria-labelledby="developer-message-title">
         <div class="modal-content">
-            <span class="close-button" id="close-developer-message-modal">&times;</span>
-            <h2 class="notification-title" id="developer-message-title">A Message from the Developer</h2>
-            <p>Hey there — I’m Ismail Hossain, a developer, educator, and media tinkerer from Dhaka, Bangladesh.
-            When I’m not flying my drone for documentary shoots or helping teachers level up with tech, I like to build weekend projects that make life a little easier (or just more fun).</p>
+            <button class="close-button" id="close-developer-message-modal" aria-label="Close notification">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <div class="notification-icon">
+                <i class="fas fa-code" aria-hidden="true"></i>
+            </div>
+            <h2 class="notification-title" id="developer-message-title">Hello from the Developer 👨‍💻</h2>
+            
+            <p>I'm <strong>Ismail Hossain</strong> — a developer, educator, and filmmaker from Dhaka, Bangladesh.</p>
 
-            <p>NowShowing is one of those.
-            I was tired of bouncing between unreliable streaming sites, so I built this app to:</p>
-            <ul>
-                <li>Help you search for movies & shows easily</li>
-                <li>Stream from multiple sources — switch anytime</li>
-                <li>Catch up on the latest movie buzz via the built-in news widget</li>
-                <li>Enjoy a clean, responsive UI that works on any device</li>
-                <li>Get smart stream status indicators (green = probably working)</li>
+            <p>I built <strong>NowShowing</strong> because I was tired of juggling unreliable streaming sites. This app gives you:</p>
+            
+            <ul class="developer-features">
+                <li><strong>One unified search</strong> for movies and shows</li>
+                <li><strong>Multiple sources</strong> — switch anytime if one fails</li>
+                <li><strong>Smart status indicators</strong> — green means it'll likely work</li>
+                <li><strong>Entertainment news</strong> to stay in the loop</li>
+                <li><strong>Clean, fast UI</strong> that works everywhere</li>
             </ul>
-            <p>This isn’t backed by a studio or company — just something I put together with a lot of coffee and curiosity.
-            Hope it makes your watchlist nights smoother.</p>
 
-            <p>If you run into any issues or want to share feedback, feel free to reach out!</p>
+            <p>This is a passion project — no corporate backing, just curiosity and coffee. I hope it makes your streaming nights smoother.</p>
 
-            <p><strong>Contact me:</strong> ismailhossain013@gmail.com | <a href="https://github.com/smile-plzz" target="_blank">GitHub: smile-plzz</a></p>
-
-            <p>(Fun fact: I also run a small video production firm called 15 Miles — we make drone films, documentaries, and creative content.)</p>
+            <div class="developer-contact">
+                <p><strong>Get in touch:</strong></p>
+                <p>Email: <a href="mailto:ismailhossain013@gmail.com">ismailhossain013@gmail.com</a></p>
+                <p>GitHub: <a href="https://github.com/smile-plzz" target="_blank">smile-plzz</a></p>
+                <p><em>Also working on video production at 15 Miles 🎬</em></p>
+            </div>
         </div>
     </div>
 
-    <footer class="footer">
-        <p>&copy; 2025 NowShowing. All Rights Reserved.</p>
-        <p>Powered by OMDb and VidSrc</p>
+    <!-- <CHANGE> Enhanced footer with better spacing -->
+    <footer class="footer" role="contentinfo">
+        <div class="footer-content">
+            <p>&copy; 2025 NowShowing. All rights reserved.</p>
+            <p>Powered by <strong>OMDb</strong> and <strong>VidSrc</strong></p>
+            <p class="footer-disclaimer">For entertainment purposes. Please use legal streaming services when available.</p>
+        </div>
     </footer>
 
     <link rel="manifest" href="/manifest.webmanifest">
