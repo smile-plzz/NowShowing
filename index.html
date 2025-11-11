@@ -82,52 +82,50 @@ Click “Play” if you want to risk your time, your browser, or your dignity. T
     <br> <br> 
     <main>
 
-        <!-- Mood-Based Recommendations Section -->
-<section class="recommendations-section" style="display: none;">
-    <div class="recommendations-header">
-        <h2>Movies for Your Mood</h2>
-        <p class="mood-label" id="current-mood">Based on: <span id="mood-name">Your Selection</span></p>
-    </div>
-    
-    <div class="movies-grid" id="mood-recommendations" aria-live="polite" aria-label="Movie recommendations based on your mood">
-        <!-- Movies will be populated here -->
-    </div>
-    
-    <div class="recommendations-footer">
-        <button id="load-more-mood" class="load-more-button">Load More Movies</button>
-        <button id="try-different-mood" class="try-mood-button">Try Different Mood</button>
-    </div>
-</section>
 
-<!-- Quick Search Results Section -->
-<section class="search-results-section" style="display: none;">
-    <div class="search-header">
-        <h2>Search Results</h2>
-        <p class="search-query" id="search-query">Showing results for: <span id="query-text"></span></p>
-    </div>
-    
-    <div class="movies-grid" id="search-results" aria-live="polite" aria-label="Search results for movies">
-        <!-- Search results will be populated here -->
-    </div>
-    
-    <div class="search-footer">
-        <button id="load-more-search" class="load-more-button">Load More Results</button>
-        <button id="new-search" class="new-search-button">New Search</button>
-    </div>
-</section>
-
-<!-- Empty State Section -->
-<section class="empty-state-section" style="display: none;">
-    <div class="empty-container">
-        <div class="empty-icon">🎬</div>
-        <h3>No Movies Found</h3>
-        <p>Try selecting a different mood or adjusting your search filters.</p>
-        <button id="back-to-moods" class="primary-button">Back to Moods</button>
-    </div>
-</section>
 
         
+        <section class="movies-section" id="visit-recommendation-section" style="display: block;">
+  <h2>Discover Movies by Mood</h2>
+  <div class="movies-grid" style="text-align: center; padding: 2rem;">
+    <button class="visit-button" onclick="window.location.href='https://smile-plzz.github.io/MovieRecommendationBasedOnMood/'">
+      Visit Movie Recommender
+    </button>
+  </div>
+</section>
 
+<style>
+  .visit-button {
+    background-color: var(--accent-color, #ff4757);
+    color: white;
+    border: none;
+    padding: 0.9rem 1.8rem;
+    font-size: 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+  }
+
+  .visit-button:hover {
+    background-color: #ff6b81;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 71, 87, 0.4);
+  }
+
+  .visit-button:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(255, 71, 87, 0.3);
+  }
+</style>
+
+
+
+
+
+
+
+        
 
         
         <section class="movies-section" id="continue-watching-section" style="display: none;">
