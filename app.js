@@ -163,7 +163,14 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Fmovies', url: 'https://fmovies.to/embed/', tvUrl: 'https://fmovies.to/embed/' },
         { name: 'LookMovie', url: 'https://lookmovie.io/player/', tvUrl: 'https://lookmovie.io/player/' },
         { name: 'AutoEmbed', url: 'https://autoembed.cc/embed/', tvUrl: 'https://autoembed.cc/embed/' },
+        // Extended Sources
         { name: 'MultiEmbed', url: 'https://multiembed.mov/?video_id=', tvUrl: 'https://multiembed.mov/?video_id=' },
+        { name: 'EmbedStream', url: 'https://embed.stream/movie/', tvUrl: 'https://embed.stream/tv/' },
+        { name: 'DopeBox', url: 'https://dopebox.to/movie/', tvUrl: 'https://dopebox.to/tv/' },
+        { name: 'Vidplay', url: 'https://vidplay.online/embed/movie/', tvUrl: 'https://vidplay.online/embed/tv/' },
+        { name: 'StreamSB', url: 'https://streamsb.net/e/', tvUrl: 'https://streamsb.net/e/' }, 
+        { name: 'MovieHut', url: 'https://moviehut.tv/embed/movie/', tvUrl: 'https://moviehut.tv/embed/tv/' },
+        { name: 'VidsHub', url: 'https://vidshub.xyz/embed/movie/', tvUrl: 'https://vidshub.xyz/embed/tv/' },
     ];
 
     // Merge custom sources from localStorage (optional): [{ name, url, tvUrl }]
