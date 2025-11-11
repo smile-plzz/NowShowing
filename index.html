@@ -84,42 +84,62 @@ Click “Play” if you want to risk your time, your browser, or your dignity. T
 
 
 
+
+
+
         
-     <button class="visit-button" onclick="window.location.href='https://smile-plzz.github.io/MovieRecommendationBasedOnMood/'">
-  Discover Movies by Mood
-</button>
+
+    <section class="discover-section">
+  <h2>Discover Movies by Mood</h2>
+  <button class="visit-button" onclick="window.location.href='https://smile-plzz.github.io/MovieRecommendationBasedOnMood/'">
+    Explore Now
+  </button>
+</section>
 
 <style>
+  .discover-section {
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  .discover-section h2 {
+    display: block;
+    font-size: 1.5em;
+    margin-block-start: 0.83em;
+    margin-block-end: 0.83em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
+    color: var(--text-light, #fff); /* uses theme color if available */
+  }
+
   .visit-button {
-    background-color: var(--accent-color, #ff4757);
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
+    background: linear-gradient(90deg, #ff5f6d, #ffc371);
+    color: #fff;
+    font-size: 1rem;
     font-weight: 600;
-    border-radius: 12px;
+    padding: 0.8rem 1.8rem;
+    border: none;
+    border-radius: 2rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+    box-shadow: 0 4px 10px rgba(255, 99, 71, 0.3);
   }
 
   .visit-button:hover {
-    background-color: #ff6b81;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(255, 71, 87, 0.4);
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(255, 99, 71, 0.4);
   }
 
   .visit-button:active {
-    transform: translateY(0);
-    box-shadow: 0 3px 10px rgba(255, 71, 87, 0.3);
+    transform: scale(0.98);
   }
 </style>
 
 
 
-
-
-
+        
         
 
         
