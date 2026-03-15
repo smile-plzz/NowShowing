@@ -1,20 +1,1559 @@
 <!DOCTYPE html>
+<!--
+  NowShowing — Cinematic Redesign
+  ================================
+  Design Direction: "Void Cinema" — deep obsidian blacks, warm amber stage-lighting accents,
+  editorial Playfair Display typography. Feels like an A24 poster meets a luxury streaming UI.
+
+  Compatibility: All original IDs and structural class names are preserved exactly as-is
+  so app.js continues to function without modification.
+
+  New Classes Added (purely cosmetic, no JS dependency):
+  - .section-label, .hero-grain, .nav-glass, etc.
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NowShowing</title>
-    <meta name="description" content="Search and stream movies and TV shows from multiple sources with a clean, responsive UI. Stay updated with the latest entertainment news.">
-    <meta name="theme-color" content="#e50914">
+    <meta name="description" content="Search and stream movies and TV shows from multiple sources. A cinematic browsing experience.">
+    <meta name="theme-color" content="#E8B86D">
+
+    <!-- Fonts: Playfair Display (display) + DM Sans (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
-    <link rel="preload" href="app.js" as="script">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e50914'/%3E%3Ctext x='50' y='58' font-size='54' text-anchor='middle' fill='white' font-family='Arial, Helvetica, sans-serif'%3ENS%3C/text%3E%3C/svg%3E">
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='12' fill='%2309090E'/%3E%3Ctext x='50' y='62' font-size='42' text-anchor='middle' fill='%23E8B86D' font-family='Georgia,serif' font-weight='bold'%3ENS%3C/text%3E%3C/svg%3E">
+
+    <style>
+    /* =========================================================
+       DESIGN SYSTEM — CSS Custom Properties
+       ========================================================= */
+    :root {
+        /* Background layers */
+        --bg-void:     #09090E;
+        --bg-surface:  #111118;
+        --bg-elevated: #18181F;
+        --bg-card:     #14141A;
+        --bg-overlay:  rgba(9,9,14,0.92);
+
+        /* Brand palette */
+        --gold:        #E8B86D;
+        --gold-light:  #F5D08A;
+        --gold-dim:    rgba(232,184,109,0.12);
+        --gold-glow:   rgba(232,184,109,0.25);
+        --crimson:     #C84B31;
+        --crimson-dim: rgba(200,75,49,0.15);
+
+        /* Semantic */
+        --success:     #5BAD7F;
+        --warning:     #E8B86D;
+        --error:       #E05050;
+        --info:        #5BA3AD;
+
+        /* Text */
+        --text-primary:   #F2F0E8;
+        --text-secondary: #9A9AAA;
+        --text-muted:     #4E4E62;
+        --text-gold:      #E8B86D;
+
+        /* Borders */
+        --border-subtle:  rgba(242,240,232,0.06);
+        --border-mid:     rgba(242,240,232,0.12);
+        --border-gold:    rgba(232,184,109,0.3);
+
+        /* Radius */
+        --r-xs:  3px;
+        --r-sm:  6px;
+        --r-md:  10px;
+        --r-lg:  16px;
+        --r-xl:  24px;
+        --r-2xl: 36px;
+        --r-full: 9999px;
+
+        /* Shadows */
+        --shadow-sm:   0 2px 8px rgba(0,0,0,0.45);
+        --shadow-md:   0 8px 24px rgba(0,0,0,0.55);
+        --shadow-lg:   0 20px 60px rgba(0,0,0,0.7);
+        --shadow-gold: 0 0 40px rgba(232,184,109,0.18), 0 8px 24px rgba(0,0,0,0.5);
+
+        /* Typography */
+        --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+        --font-body:    'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+        /* Font scale */
+        --text-xs:   0.75rem;
+        --text-sm:   0.875rem;
+        --text-base: 1rem;
+        --text-lg:   1.125rem;
+        --text-xl:   1.375rem;
+        --text-2xl:  1.75rem;
+        --text-3xl:  2.25rem;
+        --text-4xl:  3rem;
+        --text-5xl:  4rem;
+        --text-6xl:  5.5rem;
+
+        /* Spacing (4px base grid) */
+        --sp-1:  4px;
+        --sp-2:  8px;
+        --sp-3:  12px;
+        --sp-4:  16px;
+        --sp-5:  20px;
+        --sp-6:  24px;
+        --sp-8:  32px;
+        --sp-10: 40px;
+        --sp-12: 48px;
+        --sp-16: 64px;
+        --sp-20: 80px;
+        --sp-24: 96px;
+
+        /* Layout */
+        --nav-height: 72px;
+        --max-width: 1400px;
+        --content-pad: clamp(1rem, 4vw, 3rem);
+
+        /* Transitions */
+        --t-fast:   0.15s ease;
+        --t-base:   0.25s ease;
+        --t-slow:   0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        --t-spring: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Light theme override */
+    body.light-theme {
+        --bg-void:     #F0EEE8;
+        --bg-surface:  #F8F6F0;
+        --bg-elevated: #FFFFFF;
+        --bg-card:     #FAFAF7;
+        --bg-overlay:  rgba(240,238,232,0.95);
+        --text-primary:   #1A1A20;
+        --text-secondary: #5A5A6E;
+        --text-muted:     #A0A0B0;
+        --border-subtle:  rgba(26,26,32,0.08);
+        --border-mid:     rgba(26,26,32,0.15);
+        --shadow-sm:   0 2px 8px rgba(0,0,0,0.08);
+        --shadow-md:   0 8px 24px rgba(0,0,0,0.12);
+        --shadow-lg:   0 20px 60px rgba(0,0,0,0.18);
+    }
+
+    /* =========================================================
+       RESET & BASE
+       ========================================================= */
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html {
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        background-color: var(--bg-void);
+        color: var(--text-primary);
+        font-family: var(--font-body);
+        font-size: var(--text-base);
+        line-height: 1.6;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-void); }
+    ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: var(--r-full); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+    /* Focus styles */
+    :focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: 3px;
+        border-radius: var(--r-xs);
+    }
+
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font-family: var(--font-body); border: none; background: none; }
+    ul { list-style: none; }
+
+    /* Selection color */
+    ::selection {
+        background: var(--gold-dim);
+        color: var(--gold);
+    }
+
+    /* =========================================================
+       FILM GRAIN TEXTURE OVERLAY (pure CSS)
+       ========================================================= */
+    body::after {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0.025;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        background-repeat: repeat;
+        background-size: 128px 128px;
+    }
+
+    /* =========================================================
+       NAVIGATION
+       ========================================================= */
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        height: var(--nav-height);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 var(--content-pad);
+        gap: var(--sp-6);
+        background: linear-gradient(180deg,
+            rgba(9,9,14,0.98) 0%,
+            rgba(9,9,14,0.90) 100%);
+        backdrop-filter: blur(20px) saturate(1.2);
+        -webkit-backdrop-filter: blur(20px) saturate(1.2);
+        border-bottom: 1px solid var(--border-subtle);
+        transition: background var(--t-slow);
+    }
+
+    .navbar::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: var(--content-pad);
+        right: var(--content-pad);
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--gold-glow), transparent);
+        opacity: 0.5;
+    }
+
+    /* Brand */
+    .navbar-brand a {
+        font-family: var(--font-display);
+        font-size: var(--text-xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: 0.02em;
+        display: flex;
+        align-items: center;
+        gap: var(--sp-2);
+        transition: color var(--t-fast);
+    }
+
+    .navbar-brand a::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: var(--gold);
+        border-radius: 50%;
+        box-shadow: 0 0 12px var(--gold-glow);
+        flex-shrink: 0;
+    }
+
+    .navbar-brand a:hover { color: var(--gold); }
+
+    /* Desktop nav links */
+    .navbar-nav {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-1);
+        flex: 1;
+        margin-left: var(--sp-8);
+    }
+
+    .navbar-nav li a {
+        display: block;
+        padding: var(--sp-2) var(--sp-4);
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: var(--text-secondary);
+        border-radius: var(--r-sm);
+        letter-spacing: 0.02em;
+        transition: color var(--t-fast), background var(--t-fast);
+        white-space: nowrap;
+    }
+
+    .navbar-nav li a:hover {
+        color: var(--text-primary);
+        background: var(--border-subtle);
+    }
+
+    .navbar-nav li a.active-nav {
+        color: var(--gold);
+    }
+
+    /* Nav controls */
+    .navbar-controls {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-2);
+        flex-shrink: 0;
+    }
+
+    /* Theme toggle */
+    .theme-switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+
+    .theme-toggle {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+    }
+
+    .theme-switch label {
+        position: absolute;
+        inset: 0;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-mid);
+        border-radius: var(--r-full);
+        cursor: pointer;
+        transition: background var(--t-base), border-color var(--t-base);
+    }
+
+    .theme-switch label::before {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        left: 3px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-radius: 50%;
+        background: var(--gold);
+        box-shadow: 0 0 8px var(--gold-glow);
+        transition: transform var(--t-spring), background var(--t-base);
+    }
+
+    .theme-toggle:checked + label::before {
+        transform: translateY(-50%) translateX(20px);
+        background: var(--text-primary);
+        box-shadow: none;
+    }
+
+    .theme-switch label::after {
+        content: '☀';
+        position: absolute;
+        right: 4px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 10px;
+        opacity: 0.5;
+        transition: opacity var(--t-base);
+    }
+
+    .theme-toggle:checked + label::after {
+        content: '☾';
+        left: 4px;
+        right: auto;
+    }
+
+    /* Icon buttons */
+    .notification-button,
+    .developer-message-button {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--r-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        background: transparent;
+        border: 1px solid transparent;
+        font-size: 0.95rem;
+        transition: all var(--t-fast);
+        position: relative;
+    }
+
+    .notification-button:hover,
+    .developer-message-button:hover {
+        color: var(--gold);
+        background: var(--gold-dim);
+        border-color: var(--border-gold);
+    }
+
+    /* Hamburger */
+    .hamburger-menu {
+        display: none;
+        width: 44px;
+        height: 44px;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--r-sm);
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        transition: color var(--t-fast), background var(--t-fast);
+    }
+
+    .hamburger-menu:hover {
+        color: var(--gold);
+        background: var(--gold-dim);
+    }
+
+    /* =========================================================
+       MOBILE NAV OVERLAY
+       ========================================================= */
+    .mobile-nav-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        background: var(--bg-overlay);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--t-slow);
+    }
+
+    .mobile-nav-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .mobile-nav-links {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--sp-3);
+    }
+
+    .mobile-nav-links li a {
+        display: block;
+        font-family: var(--font-display);
+        font-size: var(--text-3xl);
+        font-weight: 600;
+        color: var(--text-secondary);
+        padding: var(--sp-3) var(--sp-8);
+        letter-spacing: 0.01em;
+        transition: color var(--t-fast);
+        text-align: center;
+    }
+
+    .mobile-nav-links li a:hover { color: var(--gold); }
+
+    /* =========================================================
+       HERO SECTION
+       ========================================================= */
+    .hero-section {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        padding-top: var(--nav-height);
+    }
+
+    /* Cinematic background layers */
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse 80% 60% at 30% 40%, rgba(232,184,109,0.07) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 80% at 80% 80%, rgba(200,75,49,0.05) 0%, transparent 60%),
+            linear-gradient(180deg, var(--bg-void) 0%, rgba(9,9,14,0.97) 60%, var(--bg-void) 100%);
+        z-index: 0;
+    }
+
+    /* Background image with overlay */
+    .hero-section::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2070&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center 30%;
+        opacity: 0.08;
+        z-index: -1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: var(--max-width);
+        margin: 0 auto;
+        padding: var(--sp-24) var(--content-pad) var(--sp-16);
+    }
+
+    /* Label above title */
+    .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--sp-2);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: var(--sp-5);
+        padding: var(--sp-2) var(--sp-4);
+        border: 1px solid var(--border-gold);
+        border-radius: var(--r-full);
+        background: var(--gold-dim);
+    }
+
+    .hero-eyebrow::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--gold);
+        box-shadow: 0 0 8px var(--gold);
+        animation: pulse-dot 2s ease infinite;
+    }
+
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.7); }
+    }
+
+    .hero-title {
+        font-family: var(--font-display);
+        font-size: clamp(var(--text-3xl), 6vw, var(--text-6xl));
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+        max-width: 14ch;
+        margin-bottom: var(--sp-6);
+    }
+
+    .hero-title em {
+        font-style: italic;
+        color: var(--gold);
+    }
+
+    .hero-subtitle {
+        font-size: var(--text-base);
+        color: var(--text-secondary);
+        max-width: 54ch;
+        line-height: 1.75;
+        margin-bottom: var(--sp-10);
+        font-weight: 300;
+    }
+
+    .hero-subtitle strong { color: var(--text-primary); font-weight: 500; }
+
+    /* =========================================================
+       SEARCH
+       ========================================================= */
+    .search-container {
+        display: flex;
+        align-items: center;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-mid);
+        border-radius: var(--r-lg);
+        overflow: hidden;
+        max-width: 600px;
+        transition: border-color var(--t-base), box-shadow var(--t-base);
+    }
+
+    .search-container:focus-within {
+        border-color: var(--gold);
+        box-shadow: 0 0 0 3px var(--gold-dim), var(--shadow-md);
+    }
+
+    #search-input {
+        flex: 1;
+        padding: var(--sp-4) var(--sp-5);
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text-primary);
+        font-family: var(--font-body);
+        font-size: var(--text-base);
+        caret-color: var(--gold);
+    }
+
+    #search-input::placeholder { color: var(--text-muted); }
+
+    #search-button {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--gold);
+        color: var(--bg-void);
+        font-size: 0.95rem;
+        flex-shrink: 0;
+        transition: background var(--t-fast), transform var(--t-fast);
+    }
+
+    #search-button:hover { background: var(--gold-light); }
+    #search-button:active { transform: scale(0.95); }
+
+    /* Search type filter pills */
+    .search-type-filter {
+        display: flex;
+        gap: var(--sp-2);
+        margin-top: var(--sp-4);
+    }
+
+    .type-filter-btn {
+        padding: var(--sp-2) var(--sp-5);
+        border-radius: var(--r-full);
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: var(--text-secondary);
+        background: transparent;
+        border: 1px solid var(--border-mid);
+        transition: all var(--t-fast);
+        letter-spacing: 0.02em;
+    }
+
+    .type-filter-btn:hover {
+        color: var(--text-primary);
+        border-color: var(--border-mid);
+        background: var(--border-subtle);
+    }
+
+    .type-filter-btn.active {
+        background: var(--gold);
+        color: var(--bg-void);
+        border-color: var(--gold);
+        font-weight: 600;
+    }
+
+    /* =========================================================
+       MAIN CONTENT AREA
+       ========================================================= */
+    main {
+        max-width: var(--max-width);
+        margin: 0 auto;
+        padding: var(--sp-8) var(--content-pad) var(--sp-16);
+    }
+
+    /* =========================================================
+       MOOD DISCOVER BANNER
+       ========================================================= */
+    .discover-section {
+        position: relative;
+        margin: 0 0 var(--sp-12);
+        padding: var(--sp-8) var(--sp-10);
+        border-radius: var(--r-xl);
+        background: linear-gradient(135deg,
+            rgba(232,184,109,0.08) 0%,
+            rgba(200,75,49,0.06) 50%,
+            rgba(9,9,14,0.5) 100%);
+        border: 1px solid var(--border-gold);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--sp-6);
+        overflow: hidden;
+    }
+
+    .discover-section::before {
+        content: '✦';
+        position: absolute;
+        right: var(--sp-10);
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 5rem;
+        color: var(--gold);
+        opacity: 0.06;
+        pointer-events: none;
+        user-select: none;
+        line-height: 1;
+    }
+
+    .discover-text h2 {
+        font-family: var(--font-display);
+        font-size: var(--text-xl);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--sp-1);
+    }
+
+    .discover-text p {
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+    }
+
+    .visit-button {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--sp-2);
+        padding: var(--sp-3) var(--sp-6);
+        background: var(--gold);
+        color: var(--bg-void);
+        font-size: var(--text-sm);
+        font-weight: 600;
+        border-radius: var(--r-full);
+        letter-spacing: 0.03em;
+        transition: all var(--t-spring);
+        flex-shrink: 0;
+        box-shadow: 0 4px 16px var(--gold-glow);
+    }
+
+    .visit-button::after { content: '→'; font-size: 1.1em; }
+
+    .visit-button:hover {
+        background: var(--gold-light);
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 8px 24px var(--gold-glow);
+    }
+
+    .visit-button:active { transform: translateY(0) scale(0.98); }
+
+    /* =========================================================
+       SECTION LAYOUT
+       ========================================================= */
+    .movies-section,
+    .news-section {
+        margin-bottom: var(--sp-12);
+    }
+
+    .movies-section h2,
+    .news-section h2 {
+        font-family: var(--font-display);
+        font-size: var(--text-2xl);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--sp-6);
+        display: flex;
+        align-items: center;
+        gap: var(--sp-3);
+        letter-spacing: -0.01em;
+    }
+
+    .movies-section h2::before,
+    .news-section h2::before {
+        content: '';
+        display: inline-block;
+        width: 3px;
+        height: 1.3em;
+        background: var(--gold);
+        border-radius: var(--r-full);
+        flex-shrink: 0;
+    }
+
+    /* =========================================================
+       MOVIES GRID
+       ========================================================= */
+    .movies-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: var(--sp-4);
+    }
+
+    /* Cards injected by app.js */
+    .movies-grid .movie-card,
+    .movies-grid > div[data-id] {
+        position: relative;
+        border-radius: var(--r-md);
+        overflow: hidden;
+        background: var(--bg-card);
+        cursor: pointer;
+        border: 1px solid var(--border-subtle);
+        transition: transform var(--t-spring), box-shadow var(--t-slow), border-color var(--t-base);
+        animation: fadeSlideUp 0.4s ease both;
+    }
+
+    @keyframes fadeSlideUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .movies-grid .movie-card:hover,
+    .movies-grid > div[data-id]:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: var(--shadow-gold);
+        border-color: var(--border-gold);
+        z-index: 2;
+    }
+
+    /* Poster image */
+    .movies-grid img,
+    .movie-card img {
+        width: 100%;
+        aspect-ratio: 2/3;
+        object-fit: cover;
+        display: block;
+    }
+
+    /* Card info overlay */
+    .movie-card-info,
+    .movies-grid .movie-info {
+        padding: var(--sp-3) var(--sp-3) var(--sp-4);
+        background: linear-gradient(180deg, transparent 0%, var(--bg-card) 100%);
+    }
+
+    .movie-card-info h3,
+    .movies-grid h3 {
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: var(--text-primary);
+        line-height: 1.35;
+        margin-bottom: var(--sp-1);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .movie-card-info p,
+    .movies-grid p.year,
+    .movies-grid span.year {
+        font-size: var(--text-xs);
+        color: var(--text-muted);
+    }
+
+    /* Badge/rating chip */
+    .movie-card .rating,
+    .movies-grid .rating {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        font-size: var(--text-xs);
+        font-weight: 600;
+        color: var(--gold);
+        padding: 2px 6px;
+        background: var(--gold-dim);
+        border-radius: var(--r-full);
+        margin-bottom: var(--sp-2);
+    }
+
+    /* Type badge */
+    .movie-card .type-badge,
+    .type-badge {
+        position: absolute;
+        top: var(--sp-2);
+        right: var(--sp-2);
+        padding: 2px 8px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-radius: var(--r-full);
+        background: rgba(9,9,14,0.85);
+        color: var(--gold);
+        border: 1px solid var(--border-gold);
+        backdrop-filter: blur(8px);
+    }
+
+    /* Play button overlay on hover */
+    .movie-card::after,
+    .movies-grid > div[data-id]::after {
+        content: '\f144';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, calc(-50% + 10px));
+        font-size: 2.5rem;
+        color: var(--gold);
+        opacity: 0;
+        transition: opacity var(--t-base), transform var(--t-base);
+        text-shadow: 0 0 30px var(--gold-glow);
+        pointer-events: none;
+    }
+
+    .movie-card:hover::after,
+    .movies-grid > div[data-id]:hover::after {
+        opacity: 0.9;
+        transform: translate(-50%, -50%);
+    }
+
+    /* Small grid for recommendations */
+    .small-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: var(--sp-3);
+    }
+
+    /* =========================================================
+       LOAD MORE BUTTON
+       ========================================================= */
+    .load-more-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: var(--sp-6) auto 0;
+        padding: var(--sp-3) var(--sp-10);
+        background: transparent;
+        border: 1px solid var(--border-mid);
+        border-radius: var(--r-full);
+        color: var(--text-secondary);
+        font-size: var(--text-sm);
+        font-weight: 500;
+        letter-spacing: 0.03em;
+        transition: all var(--t-base);
+    }
+
+    .load-more-button:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+        background: var(--gold-dim);
+    }
+
+    /* =========================================================
+       NEWS GRID
+       ========================================================= */
+    .news-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--sp-5);
+    }
+
+    /* News cards injected by app.js */
+    .news-grid .news-card,
+    .news-grid > article,
+    .news-grid > div {
+        background: var(--bg-elevated);
+        border-radius: var(--r-lg);
+        overflow: hidden;
+        border: 1px solid var(--border-subtle);
+        transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base);
+        animation: fadeSlideUp 0.4s ease both;
+    }
+
+    .news-grid .news-card:hover,
+    .news-grid > article:hover,
+    .news-grid > div:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--border-mid);
+    }
+
+    .news-grid img {
+        width: 100%;
+        aspect-ratio: 16/9;
+        object-fit: cover;
+    }
+
+    .news-card-body,
+    .news-grid .news-content {
+        padding: var(--sp-4) var(--sp-5) var(--sp-5);
+    }
+
+    .news-grid h3 {
+        font-size: var(--text-base);
+        font-weight: 600;
+        color: var(--text-primary);
+        line-height: 1.4;
+        margin-bottom: var(--sp-2);
+    }
+
+    .news-grid p,
+    .news-grid .news-meta {
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .news-grid .news-source,
+    .news-grid .source-tag {
+        display: inline-block;
+        font-size: var(--text-xs);
+        font-weight: 600;
+        color: var(--gold);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: var(--sp-2);
+    }
+
+    /* =========================================================
+       VIDEO MODAL
+       ========================================================= */
+    .video-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        background: rgba(9,9,14,0.97);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        display: none;
+        overflow-y: auto;
+        overflow-x: hidden;
+        animation: modalFadeIn 0.3s ease;
+    }
+
+    .video-modal.active,
+    .video-modal[style*="display: block"],
+    .video-modal[style*="display:block"] {
+        display: block;
+    }
+
+    @keyframes modalFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: var(--sp-6) var(--content-pad) var(--sp-16);
+        position: relative;
+    }
+
+    /* Close button */
+    .close-button {
+        position: sticky;
+        top: var(--sp-4);
+        float: right;
+        width: 44px;
+        height: 44px;
+        border-radius: var(--r-sm);
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-mid);
+        color: var(--text-secondary);
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--t-fast);
+        z-index: 10;
+        line-height: 1;
+    }
+
+    .close-button:hover {
+        color: var(--text-primary);
+        background: var(--crimson);
+        border-color: var(--crimson);
+    }
+
+    /* Source buttons */
+    .source-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--sp-2);
+        margin-bottom: var(--sp-5);
+        clear: both;
+        padding-top: var(--sp-4);
+    }
+
+    /* Source buttons injected by app.js */
+    .source-buttons button,
+    .source-button {
+        padding: var(--sp-2) var(--sp-4);
+        border-radius: var(--r-full);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        border: 1px solid var(--border-mid);
+        color: var(--text-secondary);
+        background: var(--bg-elevated);
+        transition: all var(--t-fast);
+    }
+
+    .source-buttons button:hover,
+    .source-button:hover {
+        border-color: var(--border-gold);
+        color: var(--gold);
+        background: var(--gold-dim);
+    }
+
+    .source-buttons button.active,
+    .source-button.active {
+        background: var(--gold);
+        color: var(--bg-void);
+        border-color: var(--gold);
+    }
+
+    .source-buttons button.available,
+    .source-button.available {
+        border-color: rgba(91,173,127,0.5);
+        color: var(--success);
+    }
+
+    /* Modal actions */
+    .modal-actions {
+        margin-bottom: var(--sp-5);
+    }
+
+    .watchlist-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--sp-2);
+        padding: var(--sp-3) var(--sp-5);
+        border-radius: var(--r-full);
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: var(--text-secondary);
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-mid);
+        transition: all var(--t-base);
+    }
+
+    .watchlist-toggle:hover {
+        color: var(--gold);
+        border-color: var(--border-gold);
+        background: var(--gold-dim);
+    }
+
+    .watchlist-toggle[aria-pressed="true"] {
+        background: var(--gold);
+        color: var(--bg-void);
+        border-color: var(--gold);
+    }
+
+    .watchlist-toggle-text { font-size: var(--text-sm); }
+
+    /* Season / Episode selector */
+    #season-episode-selector {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--sp-3);
+        margin-bottom: var(--sp-5);
+        padding: var(--sp-4) var(--sp-5);
+        background: var(--bg-elevated);
+        border-radius: var(--r-md);
+        border: 1px solid var(--border-subtle);
+    }
+
+    #season-episode-selector label {
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    #season-episode-selector select {
+        padding: var(--sp-2) var(--sp-4);
+        background: var(--bg-card);
+        border: 1px solid var(--border-mid);
+        border-radius: var(--r-sm);
+        color: var(--text-primary);
+        font-family: var(--font-body);
+        font-size: var(--text-sm);
+        cursor: pointer;
+        outline: none;
+        transition: border-color var(--t-fast);
+    }
+
+    #season-episode-selector select:focus { border-color: var(--gold); }
+
+    /* Availability status */
+    #video-availability-status {
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+        margin-bottom: var(--sp-4);
+    }
+
+    /* Video player */
+    .video-player-container {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%;
+        border-radius: var(--r-lg);
+        overflow: hidden;
+        background: #000;
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--sp-6);
+        box-shadow: var(--shadow-lg);
+    }
+
+    #video-player {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .play-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(9,9,14,0.8), rgba(9,9,14,0.6));
+        cursor: pointer;
+        transition: opacity var(--t-base);
+    }
+
+    .play-overlay i {
+        font-size: 4rem;
+        color: var(--gold);
+        filter: drop-shadow(0 0 30px var(--gold-glow));
+        transition: transform var(--t-spring), filter var(--t-base);
+    }
+
+    .play-overlay:hover i {
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 50px var(--gold));
+    }
+
+    /* Video details */
+    .video-details-container {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: var(--sp-6);
+        margin-bottom: var(--sp-8);
+    }
+
+    #modal-movie-poster {
+        width: 100%;
+        border-radius: var(--r-md);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-subtle);
+        aspect-ratio: 2/3;
+        object-fit: cover;
+    }
+
+    .video-details h2 {
+        font-family: var(--font-display);
+        font-size: var(--text-2xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--sp-4);
+        letter-spacing: -0.01em;
+    }
+
+    .video-details p {
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+        line-height: 1.7;
+        margin-bottom: var(--sp-3);
+    }
+
+    .video-details p strong {
+        color: var(--text-primary);
+        font-weight: 500;
+        margin-right: var(--sp-1);
+    }
+
+    /* Recommendations */
+    .recommendations-section {
+        padding-top: var(--sp-6);
+        border-top: 1px solid var(--border-subtle);
+    }
+
+    .recommendations-section h3 {
+        font-family: var(--font-display);
+        font-size: var(--text-xl);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--sp-5);
+    }
+
+    /* =========================================================
+       NOTIFICATION MODALS
+       ========================================================= */
+    .notification-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 3000;
+        background: rgba(9,9,14,0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: var(--sp-6);
+        overflow-y: auto;
+    }
+
+    .notification-modal[style*="display: flex"],
+    .notification-modal[style*="display:flex"],
+    .notification-modal.active {
+        display: flex;
+    }
+
+    .notification-modal .modal-content {
+        max-width: 620px;
+        width: 100%;
+        background: var(--bg-elevated);
+        border-radius: var(--r-xl);
+        border: 1px solid var(--border-mid);
+        box-shadow: var(--shadow-lg), 0 0 0 1px var(--border-gold);
+        padding: var(--sp-8) var(--sp-8) var(--sp-8);
+        position: relative;
+        animation: modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes modalSlideUp {
+        from { opacity: 0; transform: translateY(30px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .notification-modal .close-button {
+        position: absolute;
+        top: var(--sp-4);
+        right: var(--sp-4);
+        float: none;
+    }
+
+    .notification-title {
+        font-family: var(--font-display);
+        font-size: var(--text-xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--sp-5);
+        padding-right: var(--sp-10);
+        line-height: 1.3;
+    }
+
+    .notification-subtitle {
+        font-size: var(--text-base);
+        font-weight: 600;
+        color: var(--gold);
+        margin: var(--sp-5) 0 var(--sp-3);
+    }
+
+    .notification-modal p {
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+        line-height: 1.75;
+        margin-bottom: var(--sp-4);
+    }
+
+    .notification-modal p strong {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .notification-modal ul {
+        list-style: none;
+        margin-bottom: var(--sp-4);
+        padding-left: 0;
+    }
+
+    .notification-modal li {
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+        line-height: 1.7;
+        padding: var(--sp-2) 0 var(--sp-2) var(--sp-6);
+        position: relative;
+    }
+
+    .notification-modal li::before {
+        content: '→';
+        position: absolute;
+        left: 0;
+        color: var(--gold);
+        font-weight: 600;
+    }
+
+    .notification-modal li strong {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .notification-modal a {
+        color: var(--gold);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        transition: color var(--t-fast);
+    }
+
+    .notification-modal a:hover { color: var(--gold-light); }
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
+    .footer {
+        text-align: center;
+        padding: var(--sp-8) var(--content-pad);
+        border-top: 1px solid var(--border-subtle);
+        color: var(--text-muted);
+        font-size: var(--text-sm);
+        line-height: 2;
+    }
+
+    .footer a {
+        color: var(--gold);
+        transition: color var(--t-fast);
+    }
+
+    .footer a:hover { color: var(--gold-light); }
+
+    /* =========================================================
+       LOADING SKELETON
+       ========================================================= */
+    .skeleton {
+        background: linear-gradient(
+            90deg,
+            var(--bg-elevated) 25%,
+            var(--bg-card) 50%,
+            var(--bg-elevated) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s ease infinite;
+        border-radius: var(--r-md);
+    }
+
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    .skeleton-card {
+        aspect-ratio: 2/3;
+        border-radius: var(--r-md);
+    }
+
+    /* =========================================================
+       EMPTY STATES
+       ========================================================= */
+    .empty-state {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: var(--sp-12) var(--sp-6);
+    }
+
+    .empty-state .empty-icon {
+        font-size: 3rem;
+        margin-bottom: var(--sp-4);
+        opacity: 0.3;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: var(--text-base);
+    }
+
+    /* =========================================================
+       RESPONSIVE — TABLET
+       ========================================================= */
+    @media (max-width: 1024px) {
+        .movies-grid {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        }
+
+        .video-details-container {
+            grid-template-columns: 140px 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .navbar-nav { display: none; }
+        .hamburger-menu { display: flex; }
+
+        .hero-title {
+            max-width: 100%;
+        }
+
+        .movies-grid {
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: var(--sp-3);
+        }
+
+        .news-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .video-details-container {
+            grid-template-columns: 1fr;
+        }
+
+        #modal-movie-poster {
+            max-width: 160px;
+        }
+
+        .discover-section {
+            flex-direction: column;
+            text-align: center;
+            padding: var(--sp-6);
+        }
+
+        .discover-section::before { display: none; }
+
+        .notification-modal .modal-content {
+            padding: var(--sp-6);
+        }
+    }
+
+    @media (max-width: 480px) {
+        :root { --nav-height: 60px; }
+
+        .movies-grid {
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: var(--sp-2);
+        }
+
+        .hero-content {
+            padding-top: var(--sp-16);
+            padding-bottom: var(--sp-10);
+        }
+
+        .source-buttons {
+            gap: var(--sp-1);
+        }
+
+        .source-buttons button,
+        .source-button {
+            font-size: 9px;
+            padding: var(--sp-1) var(--sp-3);
+        }
+    }
+
+    /* =========================================================
+       LIGHT THEME ADJUSTMENTS
+       ========================================================= */
+    body.light-theme .hero-section::after {
+        opacity: 0.05;
+    }
+
+    body.light-theme .navbar {
+        background: linear-gradient(180deg,
+            rgba(240,238,232,0.98) 0%,
+            rgba(240,238,232,0.93) 100%);
+        border-bottom-color: rgba(26,26,32,0.1);
+    }
+
+    body.light-theme .search-container {
+        background: var(--bg-elevated);
+    }
+
+    body.light-theme .movies-grid .movie-card,
+    body.light-theme .movies-grid > div[data-id] {
+        box-shadow: var(--shadow-sm);
+    }
+
+    body.light-theme .video-modal {
+        background: rgba(240,238,232,0.97);
+    }
+
+    body.light-theme .notification-modal {
+        background: rgba(240,238,232,0.85);
+    }
+
+    body.light-theme .notification-modal .modal-content {
+        background: var(--bg-elevated);
+        border-color: rgba(26,26,32,0.15);
+    }
+
+    /* =========================================================
+       STAGGERED CARD ANIMATIONS
+       ========================================================= */
+    .movies-grid > *:nth-child(1)  { animation-delay: 0.05s; }
+    .movies-grid > *:nth-child(2)  { animation-delay: 0.10s; }
+    .movies-grid > *:nth-child(3)  { animation-delay: 0.15s; }
+    .movies-grid > *:nth-child(4)  { animation-delay: 0.20s; }
+    .movies-grid > *:nth-child(5)  { animation-delay: 0.25s; }
+    .movies-grid > *:nth-child(6)  { animation-delay: 0.30s; }
+    .movies-grid > *:nth-child(7)  { animation-delay: 0.35s; }
+    .movies-grid > *:nth-child(8)  { animation-delay: 0.40s; }
+    .movies-grid > *:nth-child(9)  { animation-delay: 0.45s; }
+    .movies-grid > *:nth-child(10) { animation-delay: 0.50s; }
+    </style>
 </head>
 <body>
 
+    <!-- =====================================================
+         NAVIGATION
+         ===================================================== -->
     <nav class="navbar">
         <div class="navbar-brand">
             <a href="#">NowShowing</a>
@@ -29,9 +1568,9 @@
         <div class="navbar-controls">
             <div class="theme-switch">
                 <input type="checkbox" id="theme-toggle" class="theme-toggle">
-                <label for="theme-toggle"></label>
+                <label for="theme-toggle" aria-label="Toggle theme"></label>
             </div>
-            <button class="notification-button" id="notification-button" aria-label="Notifications">
+            <button class="notification-button" id="notification-button" aria-label="View Notifications">
                 <i class="fas fa-bell" aria-hidden="true"></i>
             </button>
             <button class="developer-message-button" id="developer-message-button" aria-label="Developer Message">
@@ -43,6 +1582,9 @@
         </button>
     </nav>
 
+    <!-- =====================================================
+         MOBILE NAV
+         ===================================================== -->
     <div class="mobile-nav-overlay" id="mobile-nav-overlay">
         <ul class="mobile-nav-links">
             <li><a href="#">Home</a></li>
@@ -53,152 +1595,142 @@
         </ul>
     </div>
 
+    <!-- =====================================================
+         HERO
+         ===================================================== -->
     <section class="hero-section">
-        <div class="hero-content"><br> <br> <br> <br> <br> 
-            <h1 class="hero-title"> Find Something to Distract You From the Void.</h1>
+        <div class="hero-content">
+            <span class="hero-eyebrow">Free Streaming · Multiple Sources</span>
+            <h1 class="hero-title">Find Something to Distract You From the <em>Void.</em></h1>
             <p class="hero-subtitle">
-NowShowing pulls in third-party streams — some shady, some straight-up cursed.Those “free” movies come packed with pop-ups, redirects, and malware that mocks your will to live.<br>
+                NowShowing pulls third-party streams — some shady, some straight-up cursed.
+                Those "free" movies come with pop-ups and redirects.
+                <strong>Use Brave Browser</strong> for the least apocalyptic experience.
+                Click play. Confront the void.
+            </p>
 
-Click “Play” if you want to risk your time, your browser, or your dignity. The button offers entertainment; the void offers perspective. Use legal sources or Brave for a less apocalyptic experience,though nothing truly saves you from the void.
-</p>
-
-
-            <br><br>
             <div class="search-container">
-                <input type="text" id="search-input" placeholder="Search for a movie or TV show...">
-                <button id="search-button" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></button>
+                <input
+                    type="text"
+                    id="search-input"
+                    placeholder="Search movies, TV shows…"
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+                <button id="search-button" aria-label="Search">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                </button>
             </div>
-            <div class="search-type-filter" id="search-type-filter" aria-label="Filter search by type">
+
+            <div class="search-type-filter" id="search-type-filter" aria-label="Filter by content type">
                 <button class="type-filter-btn active" data-type="" aria-pressed="true">All</button>
                 <button class="type-filter-btn" data-type="movie" aria-pressed="false">Movies</button>
                 <button class="type-filter-btn" data-type="series" aria-pressed="false">TV Shows</button>
             </div>
         </div>
-        <br><br>
     </section>
 
-    <br> <br> 
+    <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
     <main>
 
+        <!-- Mood Discovery Banner -->
+        <section class="discover-section">
+            <div class="discover-text">
+                <h2>Discover Movies by Mood</h2>
+                <p>Not sure what to watch? Let your mood decide.</p>
+            </div>
+            <button
+                class="visit-button"
+                onclick="window.location.href='https://smile-plzz.github.io/MovieRecommendationBasedOnMood/'"
+                aria-label="Explore mood-based movie recommendations"
+            >
+                Explore Now
+            </button>
+        </section>
 
-
-
-
-
-        
-<br> <br> <br>
-    <section class="discover-section">
-  <h2>Discover Movies by Mood</h2>
-  <button class="visit-button" onclick="window.location.href='https://smile-plzz.github.io/MovieRecommendationBasedOnMood/'">
-    Explore Now
-  </button>
-</section>
-
-<style>
-  .discover-section {
-    text-align: center;
-    margin-top: 2rem;
-  }
-
-  .discover-section h2 {
-    display: block;
-    font-size: 1.5em;
-    margin-block-start: 0.83em;
-    margin-block-end: 0.83em;
-    margin-inline-start: 0px;
-    margin-inline-end: 0px;
-    font-weight: bold;
-    unicode-bidi: isolate;
-    color: var(--text-light, #fff); /* uses theme color if available */
-  }
-
-  .visit-button {
-    background: linear-gradient(90deg, #ff5f6d, #ffc371);
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 600;
-    padding: 0.8rem 1.8rem;
-    border: none;
-    border-radius: 2rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(255, 99, 71, 0.3);
-  }
-
-  .visit-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(255, 99, 71, 0.4);
-  }
-
-  .visit-button:active {
-    transform: scale(0.98);
-  }
-</style>
-
-
-
-        
-        
-
-        
+        <!-- Continue Watching -->
         <section class="movies-section" id="continue-watching-section" style="display: none;">
             <h2>Continue Watching</h2>
-            <div class="movies-grid" id="continue-watching-grid" aria-live="polite"></div>
+            <div class="movies-grid" id="continue-watching-grid" aria-live="polite" aria-label="Continue watching list"></div>
         </section>
 
+        <!-- Watchlist -->
         <section class="movies-section" id="watchlist-section" style="display: none;">
             <h2>Your Watchlist</h2>
-            <div class="movies-grid" id="watchlist-grid" aria-live="polite"></div>
+            <div class="movies-grid" id="watchlist-grid" aria-live="polite" aria-label="Your watchlist"></div>
         </section>
 
+        <!-- Popular Movies -->
         <section class="movies-section">
             <h2>Popular Movies</h2>
-            <div class="movies-grid" id="popular-movies" aria-live="polite"></div>
+            <div class="movies-grid" id="popular-movies" aria-live="polite" aria-label="Popular movies"></div>
             <button id="load-more-popular" class="load-more-button">Load More</button>
         </section>
 
+        <!-- Search Results -->
         <section class="movies-section" style="display: none;">
             <h2 id="search-results-heading">Search Results</h2>
-            <div class="movies-grid" id="search-results" aria-live="polite"></div>
+            <div class="movies-grid" id="search-results" aria-live="polite" aria-label="Search results"></div>
             <button id="load-more-search" class="load-more-button">Load More</button>
         </section>
 
+        <!-- Popular TV Shows -->
         <section class="movies-section" style="display: none;">
             <h2>Popular TV Shows</h2>
-            <div class="movies-grid" id="popular-tv-shows" aria-live="polite"></div>
+            <div class="movies-grid" id="popular-tv-shows" aria-live="polite" aria-label="Popular TV shows"></div>
             <button id="load-more-popular-tv" class="load-more-button">Load More</button>
         </section>
 
+        <!-- Latest News -->
         <section class="news-section">
             <h2>Latest News</h2>
-            <div class="news-grid" id="news-grid" aria-live="polite"></div>
+            <div class="news-grid" id="news-grid" aria-live="polite" aria-label="Latest entertainment news"></div>
             <button id="load-more-news" class="load-more-button" style="display: none;">Load More News</button>
         </section>
+
     </main>
 
+    <!-- =====================================================
+         VIDEO MODAL
+         ===================================================== -->
     <div class="video-modal" id="video-modal" role="dialog" aria-modal="true" aria-labelledby="modal-movie-title">
         <div class="modal-content">
-            <button class="close-button" aria-label="Close">&times;</button>
+            <button class="close-button" aria-label="Close modal">&times;</button>
+
             <div class="source-buttons" id="source-buttons"></div>
+
             <div class="modal-actions">
                 <button id="watchlist-toggle" class="watchlist-toggle" aria-pressed="false">
                     <i class="fas fa-bookmark" aria-hidden="true"></i>
                     <span class="watchlist-toggle-text">Add to Watchlist</span>
                 </button>
             </div>
+
             <div id="season-episode-selector" style="display: none;">
                 <label for="season-select">Season:</label>
                 <select id="season-select"></select>
                 <label for="episode-select">Episode:</label>
                 <select id="episode-select"></select>
             </div>
+
             <div id="video-availability-status"></div>
+
             <div class="video-player-container">
-                <iframe id="video-player" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; encrypted-media"></iframe>
-                <div class="play-overlay" id="video-play-overlay">
-                    <i class="fas fa-play"></i>
+                <iframe
+                    id="video-player"
+                    width="100%"
+                    height="100%"
+                    frameborder="0"
+                    allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+                    title="Video player"
+                ></iframe>
+                <div class="play-overlay" id="video-play-overlay" role="button" tabindex="0" aria-label="Play video">
+                    <i class="fas fa-play" aria-hidden="true"></i>
                 </div>
             </div>
+
             <div class="video-details-container">
                 <img id="modal-movie-poster" src="" alt="Movie Poster">
                 <div class="video-details">
@@ -222,109 +1754,203 @@ Click “Play” if you want to risk your time, your browser, or your dignity. T
                     <p><strong>Website:</strong> <span id="modal-movie-website"></span></p>
                 </div>
             </div>
-            
-            <div class="recommendations-section" id="recommendations-section" style="display: none;">
-                <h3>You might also like:</h3>
-                <div class="movies-grid small-grid" id="recommendations-grid">
-                    </div>
-            </div>
-            </div>
-    </div>
 
-    <div class="notification-modal" id="notification-modal" role="dialog" aria-modal="true" aria-labelledby="notification-title">
-        <div class="modal-content">
-            <button class="close-button" id="close-notification-modal" aria-label="Close">&times;</button>
-            <h2 class="notification-title">⚠️ Best Viewed on Brave Browser</h2>
-            <p>NowShowing works best with Brave Browser due to its aggressive ad and tracker blocking capabilities, which significantly improve performance and reduce interruptions from third-party streaming sources.</p>
-            <p>While other browsers may work, Brave offers:</p>
-            <ul>
-                <li><strong>Better playback stability</strong> across streaming sources</li>
-                <li><strong>Fewer pop-ups, redirects, and unwanted ads</strong></li>
-                <li><strong>Faster loading</strong> with enhanced privacy</li>
-            </ul>
-            <p>We highly recommend Brave for the smoothest viewing experience.</p>
-            <h3 class="notification-subtitle">Why This Matters</h3>
-            <p>NowShowing pulls in video streams via third-party embedded players like VidSrc, SuperEmbed, 2Embed, and others. These sources often:</p>
-            <ul>
-                <li>Inject ads/popups before or during playback</li>
-                <li>Redirect users to unrelated pages</li>
-                <li>Load extra scripts that slow down or break the experience</li>
-                <li>Behave inconsistently across browsers depending on ad blockers or script permissions</li>
-            </ul>
-            <p>This makes the experience unreliable in default browsers like Chrome, Edge, or Safari — unless heavily modified with extensions.</p>
-            <h3 class="notification-subtitle">Why Brave?</h3>
-            <p>Brave is built with a focus on privacy and performance. It automatically blocks ads and trackers by default, which is particularly beneficial when dealing with third-party video embeds that often come with intrusive advertising and tracking scripts. This leads to:</p>
-            <ul>
-                <li><strong>Reduced resource consumption:</strong> Less data downloaded, faster page loads.</li>
-                <li><strong>Enhanced privacy:</strong> Protection against unwanted tracking.</li>
-                <li><strong>Fewer interruptions:</strong> A cleaner viewing experience without pop-ups or redirects.</li>
-            </ul>
-            <p>While we strive to make NowShowing work across all browsers, the nature of third-party video sources means that a browser like Brave, with its built-in protections, can offer a significantly smoother and more reliable streaming experience.</p>
+            <div class="recommendations-section" id="recommendations-section" style="display: none;">
+                <h3>You might also like</h3>
+                <div class="movies-grid small-grid" id="recommendations-grid" aria-label="Recommended titles"></div>
+            </div>
         </div>
     </div>
 
-    <div class="notification-modal" id="switch-source-notification-modal" role="dialog" aria-modal="true" aria-labelledby="switch-source-notification-title">
+    <!-- =====================================================
+         NOTIFICATION MODAL (Browser recommendation)
+         ===================================================== -->
+    <div class="notification-modal" id="notification-modal" role="dialog" aria-modal="true" aria-labelledby="notification-title">
+        <div class="modal-content">
+            <button class="close-button" id="close-notification-modal" aria-label="Close">&times;</button>
+            <h2 class="notification-title" id="notification-title">⚠️ Best Viewed on Brave Browser</h2>
+            <p>NowShowing works best with Brave Browser due to its aggressive ad and tracker blocking, which significantly improves performance with third-party streams.</p>
+            <p>Brave offers:</p>
+            <ul>
+                <li><strong>Better playback stability</strong> across all streaming sources</li>
+                <li><strong>Fewer pop-ups, redirects, and unwanted ads</strong></li>
+                <li><strong>Faster loading</strong> with enhanced privacy</li>
+            </ul>
+            <h3 class="notification-subtitle">Why This Matters</h3>
+            <p>NowShowing uses third-party embedded players (VidSrc, SuperEmbed, 2Embed and others). These sources often inject ads, redirect users, and behave inconsistently across browsers without strong ad blocking.</p>
+            <h3 class="notification-subtitle">Recommendation</h3>
+            <p>Use <strong>Brave Browser</strong> with its built-in shields, or add uBlock Origin to Chrome/Firefox. If a source doesn't load, try the next one — green buttons indicate likely-available streams.</p>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         SWITCH SOURCE MODAL
+         ===================================================== -->
+    <div class="notification-modal" id="switch-source-notification-modal" role="dialog" aria-modal="true" aria-labelledby="switch-source-title">
         <div class="modal-content">
             <button class="close-button" id="close-switch-source-notification" aria-label="Close">&times;</button>
-            <h2 class="notification-title">Having trouble with this stream?</h2>
-            <p>Video streams can sometimes be unreliable due to various factors, including:</p>
+            <h2 class="notification-title" id="switch-source-title">Having trouble with this stream?</h2>
+            <p>Streams can be unreliable due to ad blockers, geo-restrictions, high traffic, or temporary outages. Here's what to try:</p>
             <ul>
-                <li><strong>Browser Ad Blockers:</strong> Aggressive ad blockers might interfere with the video player.</li>
-                <li><strong>Geographical Restrictions:</strong> Some sources may not be available in your region.</li>
-                <li><strong>Source Overload:</strong> High traffic on a source can lead to buffering or playback issues.</li>
-                <li><strong>Temporary Issues:</strong> The video source might be temporarily down or experiencing technical difficulties.</li>
-            </ul>
-            <p><strong>What you can do:</strong></p>
-            <ul>
-                <li><strong>Try Other Sources:</strong> Click the green or red source buttons below the video player to switch to an alternative. Green indicates a likely available source, but all are worth trying.</li>
-                <li><strong>Disable Ad Blocker (Temporarily):</strong> If you're using an ad blocker, try disabling it for this site and reloading the page.</li>
-                <li><strong>Try a Different Browser:</strong> Some browsers handle embeds differently.</li>
-                <li><strong>Check Your Internet Connection:</strong> Ensure your network is stable.</li>
+                <li><strong>Switch sources:</strong> Click a different source button — green means likely available</li>
+                <li><strong>Disable ad blocker</strong> temporarily and reload</li>
+                <li><strong>Try a different browser</strong> — Brave is recommended</li>
+                <li><strong>Check your connection</strong> for stability issues</li>
             </ul>
             <p>We strive to provide multiple options for a seamless experience. Thank you for your patience!</p>
         </div>
     </div>
 
+    <!-- =====================================================
+         DEVELOPER MESSAGE MODAL
+         ===================================================== -->
     <div class="notification-modal" id="developer-message-modal" role="dialog" aria-modal="true" aria-labelledby="developer-message-title">
         <div class="modal-content">
             <button class="close-button" id="close-developer-message-modal" aria-label="Close">&times;</button>
             <h2 class="notification-title" id="developer-message-title">A Message from the Developer</h2>
-            <p>Hey there — I’m Ismail Hossain, a developer, educator, and media tinkerer from Dhaka, Bangladesh.
-            When I’m not flying my drone for documentary shoots or helping teachers level up with tech, I like to build weekend projects that make life a little easier (or just more fun).</p>
-
-            <p>NowShowing is one of those.
-            I was tired of bouncing between unreliable streaming sites, so I built this app to:</p>
+            <p>Hey — I'm <strong>Ismail Hossain</strong>, a developer, educator, and media tinkerer from Dhaka, Bangladesh. When I'm not flying my drone for documentary shoots or helping teachers level up with tech, I build weekend projects that make life a little easier.</p>
+            <p>NowShowing is one of those. I was tired of bouncing between unreliable streaming sites, so I built this to:</p>
             <ul>
-                <li>Help you search for movies & shows easily</li>
+                <li>Search movies &amp; shows easily in one place</li>
                 <li>Stream from multiple sources — switch anytime</li>
-                <li>Catch up on the latest movie buzz via the built-in news widget</li>
-                <li>Enjoy a clean, responsive UI that works on any device</li>
-                <li>Get smart stream status indicators (green = probably working)</li>
+                <li>Catch up on movie buzz via the built-in news widget</li>
+                <li>Work cleanly on any device with smart stream indicators</li>
             </ul>
-            <p>This isn’t backed by a studio or company — just something I put together with a lot of coffee and curiosity.
-            Hope it makes your watchlist nights smoother.</p>
-
-            <p>If you run into any issues or want to share feedback, feel free to reach out!</p>
-
-            <p><strong>Contact me:</strong> ismailhossain013@gmail.com | <a href="https://github.com/smile-plzz" target="_blank">GitHub: smile-plzz</a></p>
-
-            <p>(Fun fact: I also run a small video production firm called 15 Miles — we make drone films, documentaries, and creative content.)</p>
+            <p>This isn't backed by a studio — just coffee, curiosity, and a lot of late nights. Hope it makes your watchlist nights smoother.</p>
+            <p><strong>Contact:</strong> ismailhossain013@gmail.com · <a href="https://github.com/smile-plzz" target="_blank" rel="noopener">GitHub: smile-plzz</a></p>
+            <p style="color: var(--text-muted); font-size: 0.8rem; font-style: italic;">Fun fact: I also run a small video production firm called <strong>15 Miles</strong> — drone films, documentaries, and creative content.</p>
         </div>
     </div>
 
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
     <footer class="footer">
-        <p>&copy; 2025 NowShowing. All Rights Reserved.</p>
-        <p>Powered by OMDb and VidSrc</p>
+        <p>&copy; 2025 NowShowing — Built with ☕ by <a href="https://github.com/smile-plzz" target="_blank" rel="noopener">Ismail Hossain</a></p>
+        <p style="margin-top: 4px; font-size: 0.75rem;">Powered by OMDb &amp; VidSrc · Use Brave for best results</p>
     </footer>
 
+    <!-- PWA -->
     <link rel="manifest" href="/manifest.webmanifest">
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/service-worker.js');
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+            });
+        }
+
+        /* ─── Theme toggle persistence ─── */
+        const toggle = document.getElementById('theme-toggle');
+        const saved = localStorage.getItem('ns-theme');
+
+        if (saved === 'light') {
+            document.body.classList.add('light-theme');
+            toggle.checked = true;
+        }
+
+        toggle.addEventListener('change', () => {
+            if (toggle.checked) {
+                document.body.classList.add('light-theme');
+                localStorage.setItem('ns-theme', 'light');
+            } else {
+                document.body.classList.remove('light-theme');
+                localStorage.setItem('ns-theme', 'dark');
+            }
+        });
+
+        /* ─── Mobile nav ─── */
+        const hamburger = document.getElementById('hamburger-menu');
+        const mobileOverlay = document.getElementById('mobile-nav-overlay');
+
+        hamburger.addEventListener('click', () => {
+            const isOpen = mobileOverlay.classList.toggle('open');
+            hamburger.setAttribute('aria-expanded', isOpen);
+            hamburger.innerHTML = isOpen
+                ? '<i class="fas fa-times" aria-hidden="true"></i>'
+                : '<i class="fas fa-bars" aria-hidden="true"></i>';
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        });
+
+        mobileOverlay.addEventListener('click', (e) => {
+            if (e.target === mobileOverlay) {
+                mobileOverlay.classList.remove('open');
+                hamburger.innerHTML = '<i class="fas fa-bars" aria-hidden="true"></i>';
+                document.body.style.overflow = '';
+            }
+        });
+
+        /* Close mobile nav on link click */
+        mobileOverlay.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileOverlay.classList.remove('open');
+                hamburger.innerHTML = '<i class="fas fa-bars" aria-hidden="true"></i>';
+                document.body.style.overflow = '';
+            });
+        });
+
+        /* ─── Notification modal helpers ─── */
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.display = 'flex';
+                el.setAttribute('aria-hidden', 'false');
+            }
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.display = 'none';
+                el.setAttribute('aria-hidden', 'true');
+            }
+        }
+
+        document.getElementById('notification-button')
+            .addEventListener('click', () => openModal('notification-modal'));
+        document.getElementById('close-notification-modal')
+            .addEventListener('click', () => closeModal('notification-modal'));
+
+        document.getElementById('developer-message-button')
+            .addEventListener('click', () => openModal('developer-message-modal'));
+        document.getElementById('close-developer-message-modal')
+            .addEventListener('click', () => closeModal('developer-message-modal'));
+
+        document.getElementById('close-switch-source-notification')
+            .addEventListener('click', () => closeModal('switch-source-notification-modal'));
+
+        /* Close on backdrop click */
+        document.querySelectorAll('.notification-modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        });
+
+        /* ─── Navbar scroll behavior ─── */
+        const navbar = document.querySelector('.navbar');
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const current = window.scrollY;
+            if (current > 80) {
+                navbar.style.background = 'rgba(9,9,14,0.98)';
+            } else {
+                navbar.style.background = '';
+            }
+            lastScroll = current;
+        }, { passive: true });
+
+        /* ─── Play overlay keyboard access ─── */
+        const playOverlay = document.getElementById('video-play-overlay');
+        if (playOverlay) {
+            playOverlay.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    playOverlay.click();
+                }
             });
         }
     </script>
+
+    <!-- Original app logic — loads after our enhancements -->
     <script src="app.js"></script>
 </body>
 </html>
