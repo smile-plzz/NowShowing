@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const developerMessageButton = document.getElementById('developer-message-button');
     const developerMessageModal = document.getElementById('developer-message-modal');
     const closeDeveloperMessageModal = document.getElementById('close-developer-message-modal');
-    const refreshImagesButton = document.getElementById('refresh-images-button');
+    // refreshImagesButton removed from navbar (ISS-004)
 
     // Note: The opening mechanism for switchSourceNotificationModal (setting display: 'flex')
     // is not explicitly found in app.js. Ensure that wherever this modal is opened,
@@ -144,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let newsPage = 1;
     let searchResultsPage = 1;
     let currentSearchQuery = '';
+    let currentSearchType = ''; // '' = all, 'movie', 'series'
     let lastFocusedElement = null; // To store the element that had focus before modal opened
     let currentOpenImdbId = null;
 
@@ -264,7 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const api = {
         async checkVideoAvailability(url) {
-            console.log(`[checkVideoAvailability] Checking URL: ${url}`);
             try {
                 const response = await fetch('/api/check-video', {
                     method: 'POST',
@@ -282,7 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error(`[checkVideoAvailability] Non-JSON response for ${url}:`, textResponse);
                     return false; // Treat as unavailable if response is not valid JSON
                 }
-                console.log(`[checkVideoAvailability] Response for ${url}:`, data);
                 return data.available;
             } catch (error) {
                 console.error(`[checkVideoAvailability] Error checking video availability for ${url}:`, error);
@@ -295,13 +294,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (type) {
                     url += `&type=${type}`;
                 }
-                console.log(`Fetching movie by title: ${title}, URL: ${url}`);
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log(`Response for ${title}:`, data);
                 return data;
             } catch (error) {
                 console.error(`Error fetching movie by title (${title}):`, error);
@@ -311,13 +308,11 @@ document.addEventListener('DOMContentLoaded', () => {
         async fetchMovieDetails(imdbID) {
             try {
                 const url = `/api/omdb-proxy?imdbID=${imdbID}&plot=full`;
-                console.log(`Fetching movie details for IMDB ID: ${imdbID}, URL: ${url}`);
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log(`Details response for ${imdbID}:`, data);
                 return data;
             } catch (error) {
                 console.error(`Error fetching movie details (${imdbID}):`, error);
@@ -330,13 +325,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (type) {
                     url += `&type=${type}`;
                 }
-                console.log(`Searching movies: ${query}, Page: ${page}, Type: ${type}, URL: ${url}`);
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log(`Search response for ${query}:`, data);
                 return data;
             } catch (error) {
                 console.error(`Error fetching search results (${query}):`, error);
@@ -346,13 +339,11 @@ document.addEventListener('DOMContentLoaded', () => {
         async fetchTvShowSeason(imdbID, seasonNumber) {
             try {
                 const url = `/api/omdb-proxy?imdbID=${imdbID}&seasonNumber=${seasonNumber}`;
-                console.log(`Fetching season ${seasonNumber} for IMDB ID: ${imdbID}, URL: ${url}`);
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log(`Season ${seasonNumber} response for ${imdbID}:`, data);
                 return data;
             } catch (error) {
                 console.error(`Error fetching season ${seasonNumber} for ${imdbID}:`, error);
@@ -573,51 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Nuclear image refresh completed
         },
 
-        // Get image loading statistics
-        getImageStats() {
-            // This function is no longer relevant as imageLoader.loadingImages is removed.
-            // Keeping it for now as it might be used elsewhere or removed later.
-            return {
-                failed: 0, // No failed images tracking
-                loading: 0, // No loading images tracking
-                failedUrls: [], // No failed URLs tracking
-                cacheBuster: Date.now() // Placeholder, as cache busting is removed
-            };
-        },
-
-        // Show image loading status to user
-        showImageStatus() {
-            // This function is no longer relevant as imageLoader.loadingImages is removed.
-            // Keeping it for now as it might be used elsewhere or removed later.
-            const stats = this.getImageStats();
-            const message = `Images: ${stats.loading} loading, ${stats.failed} failed`;
-            // Image status: message
-            
-            // Show a temporary notification
-            const notification = document.createElement('div');
-            notification.className = 'image-status-notification';
-            notification.textContent = message;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: rgba(0, 0, 0, 0.8);
-                color: white;
-                padding: 10px 15px;
-                border-radius: 5px;
-                z-index: 10000;
-                font-size: 14px;
-                transition: opacity 0.3s ease;
-            `;
-            
-            document.body.appendChild(notification);
-            
-            // Remove after 3 seconds
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        },
+        // Image stats and status display removed — no longer tracked.
         
         /**
          * Creates a clickable movie card element.
@@ -779,7 +726,16 @@ document.addEventListener('DOMContentLoaded', () => {
         async renderPopularMovies(append = false) {
             // Popular titles are hardcoded as the OMDb API does not provide a direct endpoint for trending or popular movies.
             // For dynamic popular lists, consider integrating a different API like TMDb.
-            const popularTitles = ['Inception', 'The Matrix', 'Interstellar', 'The Avengers', 'Avatar', 'Titanic', 'Jurassic Park', 'Forrest Gump', 'The Lion King', 'Gladiator', 'Pulp Fiction', 'Fight Club', 'The Lord of the Rings', 'Star Wars', 'Dune'];
+            const popularTitles = [
+                'Inception', 'The Matrix', 'Interstellar', 'The Avengers', 'Avatar',
+                'Titanic', 'Jurassic Park', 'Forrest Gump', 'The Lion King', 'Gladiator',
+                'Pulp Fiction', 'Fight Club', 'The Lord of the Rings', 'Star Wars', 'Dune',
+                'Parasite', 'The Dark Knight', 'Oppenheimer', 'Barbie', 'Top Gun: Maverick',
+                'Everything Everywhere All at Once', 'Spider-Man: No Way Home',
+                'Black Panther', 'Joker', 'Knives Out', 'Get Out', 'La La Land',
+                'The Grand Budapest Hotel', 'Mad Max: Fury Road', 'Whiplash',
+                'Arrival', 'Coco'
+            ];
             const moviesPerPage = 4;
             const startIndex = (popularMoviesPage - 1) * moviesPerPage;
             const endIndex = startIndex + moviesPerPage;
@@ -832,7 +788,14 @@ document.addEventListener('DOMContentLoaded', () => {
         async renderPopularTvShows(append = false) {
             // Popular TV show titles are hardcoded as the OMDb API does not provide a direct endpoint for trending or popular TV shows.
             // For dynamic popular lists, consider integrating a different API like TMDb.
-            const popularTitles = ['Breaking Bad', 'Game of Thrones', 'The Office', 'Friends', 'The Simpsons', 'Stranger Things', 'The Mandalorian', 'The Crown', 'Westworld', 'Chernobyl', 'The Witcher', 'Black Mirror'];
+            const popularTitles = [
+                'Breaking Bad', 'Game of Thrones', 'The Office', 'Friends', 'The Simpsons',
+                'Stranger Things', 'The Mandalorian', 'The Crown', 'Westworld', 'Chernobyl',
+                'The Witcher', 'Black Mirror', 'Succession', 'The Last of Us', 'House of the Dragon',
+                'Squid Game', 'Ozark', 'Better Call Saul', 'Ted Lasso', 'Severance',
+                'Andor', 'The Bear', 'White Lotus', 'Only Murders in the Building',
+                'Peaky Blinders', 'Dark', 'Money Heist', 'Fleabag'
+            ];
             const showsPerPage = 4;
             const startIndex = (popularTvShowsPage - 1) * showsPerPage;
             const endIndex = startIndex + showsPerPage;
@@ -905,25 +868,26 @@ document.addEventListener('DOMContentLoaded', () => {
                         newsGrid.appendChild(newsCard);
                     });
 
-                    // Show/hide load more button
-                    if (newsPage * 6 < data.totalResults) {
-                        loadMoreNewsButton.style.display = 'block';
-                    } else {
-                        loadMoreNewsButton.style.display = 'none';
-                    }
+                    // GNews free tier returns one batch of articles only — hide load more
+                    loadMoreNewsButton.style.display = 'none';
 
                 }
             } catch (error) {
                 // Error fetching news
-                if (!append) { // Only show the error message on the initial load
-                    newsGrid.innerHTML = `<p class="error-message">Could not load news: ${error.message}. Please try again later.</p>`;
+                if (!append) {
+                    newsGrid.innerHTML = `<p class="error-message" style="grid-column: 1 / -1">Could not load news: ${error.message}. Please try again later.</p>`;
                 }
                 loadMoreNewsButton.style.display = 'none';
             }
         },
 
-        async renderSearchResults(query, append = false) {
+        async renderSearchResults(query, append = false, type = currentSearchType) {
             currentSearchQuery = query;
+            // Update heading dynamically
+            const heading = document.getElementById('search-results-heading');
+            if (heading) {
+                heading.textContent = query ? `Results for "${query}"` : 'Search Results';
+            }
             if (!query || query.length < 2) {
                 this.showSearchView();
                 this.displayError('Please enter at least 2 characters to search.', searchResultsGrid);
@@ -936,7 +900,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.renderSkeletons(searchResultsGrid, 8);
             }
 
-            const results = await api.fetchMoviesBySearch(query, searchResultsPage);
+            const results = await api.fetchMoviesBySearch(query, searchResultsPage, type);
 
             if (results && results.Response === 'True' && results.Search) {
                 this.renderMovieGrid(searchResultsGrid, results.Search, append, loadMoreSearchButton, searchResultsPage, results.totalResults);
@@ -960,11 +924,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             popularMoviesSection.style.display = 'block';
             searchResultsSection.style.display = 'none';
-            popularTvShowsSection.style.display = 'none';
+            popularTvShowsSection.style.display = 'block';
             searchInput.value = '';
-            loadMorePopularButton.style.display = 'block'; // Ensure it's visible on home view
-            popularMoviesPage = 1; // Reset popular movies page
-            this.renderPopularMovies(); // Re-render popular movies from start
+            popularMoviesPage = 1;
+            popularTvShowsPage = 1;
+            this.renderPopularMovies();
+            this.renderPopularTvShows();
             // Render continue and watchlist 
             const cw = storage.getContinueWatching();
             this.renderListSection(continueWatchingGrid, cw, 'No shows in your continue watching list yet. Start watching something to see it here!');
@@ -999,16 +964,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             actorsArray.forEach((actorName, index) => {
                 const actorLink = document.createElement('a');
-                actorLink.href = '#'; // Use '#' since the actual action is in the click handler
+                const searchQuery = encodeURIComponent(`${actorName} movies`);
+                actorLink.href = `https://www.google.com/search?q=${searchQuery}`;
+                actorLink.target = '_blank';
+                actorLink.rel = 'noopener noreferrer';
                 actorLink.className = 'actor-link';
                 actorLink.textContent = actorName;
                 actorLink.setAttribute('aria-label', `Search for movies starring ${actorName}`);
-
-                // The Core Logic: Open a Google Search on click
-                actorLink.addEventListener('click', (e) => {
-                    e.preventDefault(); // Stop the default anchor link behavior
-                    this.searchActorFilmography(actorName);
-                });
 
                 container.appendChild(actorLink);
 
@@ -1019,26 +981,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             return container;
-        },
-
-        /**
-         * Opens a new window/tab to perform a Google search for the actor's filmography.
-         * @param {string} actorName - The name of the actor to search for.
-         */
-        searchActorFilmography(actorName) {
-            // Updated search query to directly match the desired format: "[Actor Name] movies"
-            const searchQuery = `${actorName} movies`;
-            const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
-            
-            // Open the search in a new tab. 
-            const newWindow = window.open(googleUrl, '_blank');
-
-            if (newWindow === null) {
-                console.warn(`[ActorSearch] Popup blocked for: ${actorName}. Prompting user.`);
-                alert(`Your browser blocked the pop-up for "${actorName}" search. Please allow pop-ups for this site, or try searching manually: ${searchQuery}`);
-            }
-
-            console.log(`[ActorSearch] Triggered Google search for: ${actorName}`);
         },
 
         /**
@@ -1140,6 +1082,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const modalPoster = document.getElementById('modal-movie-poster');
                 modalPoster.src = details.Poster && details.Poster !== 'N/A' ? details.Poster : FALLBACK_POSTER;
                 modalPoster.alt = `${details.Title} Poster`;
+                modalPoster.onerror = () => { modalPoster.src = FALLBACK_POSTER; };
                 document.getElementById('modal-movie-director').textContent = details.Director;
                 document.getElementById('modal-movie-writer').textContent = details.Writer;
                 
@@ -1157,7 +1100,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('modal-movie-metascore').textContent = details.Metascore;
                 document.getElementById('modal-movie-boxoffice').textContent = details.BoxOffice;
                 document.getElementById('modal-movie-production').textContent = details.Production;
-                document.getElementById('modal-movie-website').textContent = details.Website;
+                const websiteEl = document.getElementById('modal-movie-website');
+                websiteEl.innerHTML = '';
+                if (details.Website && details.Website !== 'N/A') {
+                    const a = document.createElement('a');
+                    a.href = details.Website;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.textContent = details.Website;
+                    websiteEl.appendChild(a);
+                } else {
+                    websiteEl.textContent = 'N/A';
+                }
                 
                 // --- DYNAMIC RECOMMENDATIONS CALL ---
                 await this.renderRecommendations(details.imdbID, details.Genre); // ADDED 'await'
@@ -1630,6 +1584,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Debounced search
+    // Search type filter buttons
+    const typeFilterBtns = document.querySelectorAll('.type-filter-btn');
+    typeFilterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            typeFilterBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+            btn.classList.add('active');
+            btn.setAttribute('aria-pressed', 'true');
+            currentSearchType = btn.dataset.type;
+            if (searchInput.value.trim().length >= 2) {
+                ui.renderSearchResults(searchInput.value.trim(), false, currentSearchType);
+            }
+        });
+    });
+
     let searchDebounce;
     const triggerSearch = () => ui.renderSearchResults(searchInput.value.trim());
     searchButton.addEventListener('click', triggerSearch);
@@ -1646,7 +1614,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.showHomeView();
     });
 
-    closeButton.addEventListener('click', ui.closeVideoModal);
+    closeButton.addEventListener('click', () => ui.closeVideoModal());
     window.addEventListener('click', (event) => {
         if (event.target === videoModal) {
             ui.closeVideoModal();
@@ -1839,43 +1807,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.trapFocus(developerMessageModal);
     });
 
-    // Refresh images button click
-    refreshImagesButton.addEventListener('click', () => {
-        const icon = refreshImagesButton.querySelector('i');
-        icon.classList.add('fa-spin');
-        
-        // Regular refresh
-        ui.refreshImages();
-        
-        setTimeout(() => {
-            icon.classList.remove('fa-spin');
-        }, 2000);
-    });
-
-    // Double-click refresh button to show image status
-    refreshImagesButton.addEventListener('dblclick', (e) => {
-        e.preventDefault();
-        ui.showImageStatus();
-    });
-
-    // Triple-click for nuclear refresh
-    let clickCount = 0;
-    let clickTimer;
-    refreshImagesButton.addEventListener('click', () => {
-        clickCount++;
-        if (clickTimer) cleanupManager.timeouts.delete(clickTimer);
-        
-        clickTimer = cleanupManager.setTimeout(() => {
-            if (clickCount === 3) {
-                // Triple-click detected - initiating nuclear refresh
-                ui.nuclearImageRefresh();
-                clickCount = 0;
-            } else if (clickCount === 1) {
-                // Single click handled by separate listener
-                clickCount = 0;
-            }
-        }, 300);
-    });
+    // Force Refresh Images and Cleanup buttons removed from navbar UI.
+    // Image refresh is triggered automatically on network reconnect and page visibility change.
     // Watchlist toggle click
     watchlistToggle.addEventListener('click', () => {
         if (!currentOpenImdbId) return;
@@ -1957,6 +1890,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         ui.renderPopularMovies();
+        ui.renderPopularTvShows();
         ui.renderNews();
         
         // Avoid forced image refresh on initial load to prevent layout jank
@@ -1987,15 +1921,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     });
 
-    // --- KEYBOARD SHORTCUTS ---
-    // Ctrl+R or Cmd+R to refresh images
-    document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-            e.preventDefault(); // Prevent browser refresh
-            // Image refresh shortcut triggered
-            ui.refreshImages();
-        }
-    });
+    // Note: Ctrl+R / Cmd+R intentionally left as browser default (page reload).
 
     // Global error handler for CSP violations
     window.addEventListener('error', (event) => {

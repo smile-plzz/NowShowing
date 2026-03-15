@@ -1,3 +1,6 @@
+// MAINTAINER NOTE (ISS-019): Increment these cache version strings on every
+// deployment that modifies app.js, style.css, or index.html to ensure users
+// receive fresh assets and old caches are purged.
 const CACHE_NAME = 'nowshowing-v1.0.0';
 const STATIC_CACHE = 'static-v1.0.0';
 const DYNAMIC_CACHE = 'dynamic-v1.0.0';

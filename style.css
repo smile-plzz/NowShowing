@@ -181,38 +181,11 @@ main {
 /* <CHANGE> Refined navbar buttons with enhanced hover effects */
 .notification-button,
 .developer-message-button,
-.refresh-images-button,
-.cleanup-button {
-    background: none;
-    border: none;
-    color: var(--text-light);
-    font-size: 1.2rem;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 6px;
-    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
 .notification-button:hover,
-.developer-message-button:hover,
-.refresh-images-button:hover,
-.cleanup-button:hover {
+.developer-message-button:hover {
     background-color: rgba(255, 255, 255, 0.12);
     color: var(--text-color);
     transform: translateY(-2px);
-}
-
-.refresh-images-button .refresh-text {
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.cleanup-button:hover {
-    background-color: rgba(255, 193, 7, 0.15);
-    color: #ffc107;
 }
 
 /* --- Hamburger Menu --- */
@@ -365,7 +338,59 @@ main {
     transform: scale(0.98);
 }
 
-/* <CHANGE> Enhanced movie sections with better typography and spacing */
+/* --- Search Type Filter (All / Movies / TV Shows) --- */
+.search-type-filter {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 0.85rem;
+    flex-wrap: wrap;
+}
+
+.type-filter-btn {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-light);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.35rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    letter-spacing: 0.03em;
+}
+
+.type-filter-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text-color);
+    transform: translateY(-1px);
+}
+
+.type-filter-btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(229, 9, 20, 0.35);
+}
+
+body.light-mode .type-filter-btn {
+    background: rgba(0,0,0,0.05);
+    border-color: rgba(0,0,0,0.15);
+    color: var(--text-light);
+}
+
+/* --- Search results heading --- */
+#search-results-heading {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    color: var(--text-color);
+    text-align: left;
+    padding: 0 0.25rem;
+}
+
+
 .movies-section {
     padding: 4rem 2rem;
     max-width: 1200px;
@@ -825,6 +850,17 @@ main {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
     border: 1.5px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    /* Reset <button> browser defaults */
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    line-height: 1;
+    font-family: inherit;
+}
+
+.close-button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }
 
 .close-button:hover {
@@ -1313,15 +1349,9 @@ main {
     }
    
     .notification-button,
-    .developer-message-button,
-    .refresh-images-button,
-    .cleanup-button {
+    .developer-message-button {
         font-size: 1rem;
         padding: 6px;
-    }
-   
-    .refresh-images-button .refresh-text {
-        display: none;
     }
    
     .hamburger-menu {
@@ -1345,6 +1375,15 @@ main {
     .hero-content .search-container {
         max-width: 100%;
         margin: 1rem 0;
+    }
+
+    .search-type-filter {
+        gap: 0.4rem;
+    }
+
+    .type-filter-btn {
+        font-size: 0.78rem;
+        padding: 0.3rem 0.8rem;
     }
    
     .movies-section {
@@ -1531,50 +1570,6 @@ main {
     color: var(--primary-color);
 }
 
-.refresh-images-button {
-    background: none;
-    border: none;
-    color: var(--text-color);
-    font-size: 1.5rem;
-    cursor: pointer;
-    margin-left: 1rem;
-    transition: color 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-}
-
-.refresh-images-button:hover {
-    color: var(--primary-color);
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.refresh-images-button .fa-spin {
-    animation: spin 1s linear infinite;
-}
-
-.refresh-images-button .refresh-text {
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.cleanup-button {
-    background: none;
-    border: none;
-    color: var(--text-light);
-    cursor: pointer;
-    padding: 8px;
-    margin-left: 10px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.cleanup-button:hover {
-    background-color: rgba(255, 193, 7, 0.1);
-    color: #ffc107;
-}
 
 /* Unresponsive state styling */
 body.unresponsive {
