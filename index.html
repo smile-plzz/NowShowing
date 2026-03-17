@@ -955,20 +955,47 @@ function loadModalData(imdbId, type){
 
 /* ─── SOURCE SETUP ─── */
 const SOURCES_MOVIE = [
-  {name:'VidSrc', url:id=>`https://vidsrc.to/embed/movie/${id}`, check:id=>`https://vidsrc.to/embed/movie/${id}`},
-  {name:'VidSrc.me', url:id=>`https://vidsrc.me/embed/movie?imdb=${id}`},
-  {name:'SuperEmbed', url:id=>`https://multiembed.mov/?video_id=${id}&tmdb=0`},
-  {name:'2Embed', url:id=>`https://www.2embed.cc/embed/${id}`},
-  {name:'AutoEmbed', url:id=>`https://player.autoembed.cc/embed/movie/${id}`},
-  {name:'SmashyStream', url:id=>`https://embed.smashystream.com/playere.php?imdb=${id}`},
+  // --- Original Sources ---
+  {name:'VidSrc',        url: id => `https://vidsrc.to/embed/movie/${id}`},
+  {name:'VidSrc.me',     url: id => `https://vidsrc.me/embed/movie?imdb=${id}`},
+  {name:'SuperEmbed',    url: id => `https://multiembed.mov/?video_id=${id}&tmdb=0`},
+  {name:'2Embed',        url: id => `https://www.2embed.cc/embed/${id}`},
+  {name:'AutoEmbed',     url: id => `https://player.autoembed.cc/embed/movie/${id}`},
+  {name:'SmashyStream',  url: id => `https://embed.smashystream.com/playere.php?imdb=${id}`},
+
+  // --- New Sources ---
+  {name:'VidSrc.cc',     url: id => `https://vidsrc.cc/v2/embed/movie/${id}`},
+  {name:'VidSrc.net',    url: id => `https://vidsrc.net/embed/movie?imdb=${id}`},
+  {name:'Embed.su',      url: id => `https://embed.su/embed/movie/${id}`},
+  {name:'VidLink',       url: id => `https://vidlink.pro/movie/${id}?autoplay=true`},
+  {name:'2Embed.stream', url: id => `https://www.2embed.stream/embed/movie/${id}`},
+  {name:'AutoEmbed.co',  url: id => `https://autoembed.co/movie/imdb/${id}`},
+  {name:'IMDbEmbed',     url: id => `https://imdbembed.xyz/movie/imdb/${id}`},
+  {name:'GoDrivePlayer', url: id => `https://godriveplayer.com/player.php?imdb=${id}`},
+  {name:'NontonGo',      url: id => `https://www.nontongo.win/embed/movie/${id}`},
+  {name:'MoviesAPI',     url: id => `https://moviesapi.club/movie/${id}`},
 ];
+
 const SOURCES_TV = [
-  {name:'VidSrc', url:(id,s,e)=>`https://vidsrc.to/embed/tv/${id}/${s}/${e}`},
-  {name:'VidSrc.me', url:(id,s,e)=>`https://vidsrc.me/embed/tv?imdb=${id}&season=${s}&episode=${e}`},
-  {name:'SuperEmbed', url:(id,s,e)=>`https://multiembed.mov/?video_id=${id}&tmdb=0&s=${s}&e=${e}`},
-  {name:'2Embed', url:(id,s,e)=>`https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`},
-  {name:'AutoEmbed', url:(id,s,e)=>`https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`},
-  {name:'SmashyStream', url:(id,s,e)=>`https://embed.smashystream.com/playere.php?imdb=${id}&season=${s}&episode=${e}`},
+  // --- Original Sources ---
+  {name:'VidSrc',        url: (id,s,e) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}`},
+  {name:'VidSrc.me',     url: (id,s,e) => `https://vidsrc.me/embed/tv?imdb=${id}&season=${s}&episode=${e}`},
+  {name:'SuperEmbed',    url: (id,s,e) => `https://multiembed.mov/?video_id=${id}&tmdb=0&s=${s}&e=${e}`},
+  {name:'2Embed',        url: (id,s,e) => `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`},
+  {name:'AutoEmbed',     url: (id,s,e) => `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`},
+  {name:'SmashyStream',  url: (id,s,e) => `https://embed.smashystream.com/playere.php?imdb=${id}&season=${s}&episode=${e}`},
+
+  // --- New Sources ---
+  {name:'VidSrc.cc',     url: (id,s,e) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`},
+  {name:'VidSrc.net',    url: (id,s,e) => `https://vidsrc.net/embed/tv?imdb=${id}&season=${s}&episode=${e}`},
+  {name:'Embed.su',      url: (id,s,e) => `https://embed.su/embed/tv/${id}/${s}/${e}`},
+  {name:'VidLink',       url: (id,s,e) => `https://vidlink.pro/tv/${id}/${s}/${e}?autoplay=true`},
+  {name:'2Embed.stream', url: (id,s,e) => `https://www.2embed.stream/embed/tv/${id}/${s}/${e}`},
+  {name:'AutoEmbed.co',  url: (id,s,e) => `https://autoembed.co/tv/imdb/${id}-${s}-${e}`},
+  {name:'IMDbEmbed',     url: (id,s,e) => `https://imdbembed.xyz/tv/imdb/${id}-${s}-${e}`},
+  {name:'GoDrivePlayer', url: (id,s,e) => `https://godriveplayer.com/player.php?imdb=${id}&s=${s}&e=${e}`},
+  {name:'NontonGo',      url: (id,s,e) => `https://www.nontongo.win/embed/tv/${id}/${s}/${e}`},
+  {name:'MoviesAPI',     url: (id,s,e) => `https://moviesapi.club/tv/${id}-${s}-${e}`},
 ];
 let activeSrcIdx=0;
 function setupSources(imdbId, type){
