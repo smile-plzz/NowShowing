@@ -1,1253 +1,330 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NowShowing — Stream Anything</title>
-<meta name="description" content="Search and stream movies and TV shows from multiple sources. Clean, fast, responsive.">
-<meta name="theme-color" content="#0a0a0f">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e50914'/%3E%3Ctext x='50' y='58' font-size='54' text-anchor='middle' fill='white' font-family='Arial'%3ENS%3C/text%3E%3C/svg%3E">
-<style>
-:root {
-  --bg: #0a0a0f;
-  --bg2: #111118;
-  --bg3: #1a1a24;
-  --bg4: #22222f;
-  --surface: #1e1e2a;
-  --surface2: #252533;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --accent: #e8365d;
-  --accent2: #ff6b35;
-  --accent-glow: rgba(232,54,93,0.25);
-  --gold: #f5c518;
-  --text: #f0f0f8;
-  --text2: #9999b0;
-  --text3: #55556a;
-  --font-display: 'Syne', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-  --r: 10px;
-  --r-lg: 16px;
-  --r-xl: 24px;
-  --navbar-h: 64px;
-  --shadow: 0 4px 24px rgba(0,0,0,0.4);
-  --shadow-lg: 0 8px 48px rgba(0,0,0,0.6);
-  --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
-}
-[data-theme="light"] {
-  --bg: #f4f4f8;
-  --bg2: #eeeef3;
-  --bg3: #e5e5ec;
-  --bg4: #dddde6;
-  --surface: #ffffff;
-  --surface2: #f8f8fc;
-  --border: rgba(0,0,0,0.07);
-  --border2: rgba(0,0,0,0.12);
-  --text: #111118;
-  --text2: #44445a;
-  --text3: #99999a;
-  --shadow: 0 4px 24px rgba(0,0,0,0.1);
-  --shadow-lg: 0 8px 48px rgba(0,0,0,0.15);
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;font-size:16px}
-body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-weight:400;min-height:100vh;overflow-x:hidden;line-height:1.6}
-a{color:inherit;text-decoration:none}
-ul{list-style:none}
-img{display:block;max-width:100%}
-button{cursor:pointer;font-family:inherit;border:none;background:none;color:inherit}
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:var(--bg2)}
-::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:99px}
-::-webkit-scrollbar-thumb:hover{background:var(--accent)}
-
-/* ── NAVBAR ── */
-.navbar{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  height:var(--navbar-h);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 2rem;
-  background:rgba(10,10,15,0.85);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-  transition:background var(--transition);
-}
-[data-theme="light"] .navbar{background:rgba(244,244,248,0.85)}
-.navbar-brand a{
-  font-family:var(--font-display);font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.navbar-nav{display:flex;align-items:center;gap:0.25rem}
-.navbar-nav a{
-  font-size:0.875rem;font-weight:500;color:var(--text2);
-  padding:0.4rem 0.85rem;border-radius:var(--r);
-  transition:all var(--transition);position:relative;
-}
-.navbar-nav a:hover,.navbar-nav a.active{color:var(--text);background:var(--bg3)}
-.navbar-controls{display:flex;align-items:center;gap:0.5rem}
-.icon-btn{
-  width:38px;height:38px;border-radius:var(--r);
-  display:flex;align-items:center;justify-content:center;
-  background:var(--bg3);color:var(--text2);
-  transition:all var(--transition);font-size:0.875rem;
-}
-.icon-btn:hover{background:var(--bg4);color:var(--text)}
-.icon-btn .badge{
-  position:absolute;top:6px;right:6px;
-  width:8px;height:8px;background:var(--accent);
-  border-radius:50%;border:2px solid var(--bg);
-}
-.icon-btn-wrap{position:relative}
-.theme-toggle-btn{
-  width:38px;height:38px;border-radius:var(--r);
-  display:flex;align-items:center;justify-content:center;
-  background:var(--bg3);color:var(--text2);
-  transition:all var(--transition);font-size:0.875rem;
-}
-.theme-toggle-btn:hover{background:var(--bg4);color:var(--text)}
-.hamburger{display:none;width:38px;height:38px;border-radius:var(--r);
-  align-items:center;justify-content:center;background:var(--bg3);color:var(--text2);}
-
-/* ── MOBILE NAV ── */
-.mobile-overlay{
-  display:none;position:fixed;inset:0;z-index:200;
-  background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
-  opacity:0;transition:opacity var(--transition);
-}
-.mobile-overlay.open{opacity:1}
-.mobile-drawer{
-  position:fixed;top:0;right:0;bottom:0;width:280px;z-index:201;
-  background:var(--bg2);border-left:1px solid var(--border);
-  padding:2rem;transform:translateX(100%);transition:transform var(--transition);
-}
-.mobile-drawer.open{transform:translateX(0)}
-.mobile-drawer .brand{font-family:var(--font-display);font-size:1.3rem;font-weight:800;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  margin-bottom:2rem;}
-.mobile-drawer ul{display:flex;flex-direction:column;gap:0.25rem}
-.mobile-drawer a{
-  display:block;padding:0.75rem 1rem;border-radius:var(--r);
-  font-size:1rem;font-weight:500;color:var(--text2);
-  transition:all var(--transition);
-}
-.mobile-drawer a:hover{background:var(--bg3);color:var(--text)}
-.drawer-close{position:absolute;top:1rem;right:1rem}
-
-/* ── HERO ── */
-.hero{
-  position:relative;min-height:88vh;
-  display:flex;align-items:center;
-  padding:calc(var(--navbar-h) + 2rem) 2rem 3rem;
-  overflow:hidden;
-}
-.hero-bg{
-  position:absolute;inset:0;
-  background:url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
-  filter:brightness(0.25);
-}
-[data-theme="light"] .hero-bg{filter:brightness(0.35)}
-.hero-bg-overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(to right,var(--bg) 30%,transparent 80%),
-             linear-gradient(to top,var(--bg) 0%,transparent 50%);
-}
-.hero-content{position:relative;z-index:1;max-width:650px}
-.hero-eyebrow{
-  display:inline-flex;align-items:center;gap:0.5rem;
-  background:var(--accent-glow);border:1px solid rgba(232,54,93,0.3);
-  border-radius:99px;padding:0.3rem 0.9rem;margin-bottom:1.5rem;
-  font-size:0.78rem;font-weight:500;color:var(--accent);letter-spacing:0.05em;text-transform:uppercase;
-}
-.hero-title{
-  font-family:var(--font-display);font-size:clamp(2.2rem,5vw,3.8rem);
-  font-weight:800;line-height:1.1;letter-spacing:-0.03em;margin-bottom:1.25rem;
-}
-.hero-title span{
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.hero-sub{font-size:0.95rem;color:var(--text2);max-width:480px;margin-bottom:2rem;line-height:1.7}
-.search-wrap{
-  display:flex;align-items:center;
-  background:var(--surface);border:1px solid var(--border2);
-  border-radius:var(--r-lg);overflow:hidden;
-  box-shadow:0 0 0 0 var(--accent-glow);
-  transition:box-shadow var(--transition),border-color var(--transition);
-  max-width:560px;
-}
-.search-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-glow)}
-#search-input{
-  flex:1;padding:0.875rem 1.25rem;background:none;border:none;outline:none;
-  font-family:var(--font-body);font-size:0.95rem;color:var(--text);
-}
-#search-input::placeholder{color:var(--text3)}
-#search-button{
-  margin:6px;padding:0.65rem 1.25rem;
-  background:var(--accent);color:#fff;
-  border-radius:var(--r);font-size:0.85rem;
-  transition:all var(--transition);display:flex;align-items:center;gap:0.5rem;
-  font-weight:500;
-}
-#search-button:hover{background:#c42e4e;transform:scale(1.03)}
-.type-filters{display:flex;gap:0.4rem;margin-top:1rem}
-.type-filter-btn{
-  padding:0.4rem 1rem;border-radius:99px;font-size:0.8rem;font-weight:500;
-  background:var(--bg3);color:var(--text2);border:1px solid var(--border);
-  transition:all var(--transition);
-}
-.type-filter-btn.active,.type-filter-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
-
-/* ── STATS BAR ── */
-.stats-bar{
-  display:flex;gap:2rem;padding:1.25rem 2rem;
-  background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
-  overflow-x:auto;
-}
-.stat-item{display:flex;align-items:center;gap:0.6rem;white-space:nowrap}
-.stat-num{font-family:var(--font-display);font-size:1.25rem;font-weight:700;color:var(--accent)}
-.stat-label{font-size:0.78rem;color:var(--text2)}
-
-/* ── SECTION ── */
-.section{padding:2.5rem 2rem}
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
-.section-title{font-family:var(--font-display);font-size:1.2rem;font-weight:700;letter-spacing:-0.01em}
-.section-title span{color:var(--accent)}
-.see-all{font-size:0.8rem;color:var(--text2);display:flex;align-items:center;gap:0.3rem;
-  padding:0.35rem 0.75rem;border-radius:var(--r);border:1px solid var(--border);
-  transition:all var(--transition);}
-.see-all:hover{color:var(--accent);border-color:var(--accent)}
-
-/* ── MOOD SECTION ── */
-.mood-section{
-  margin:0 2rem 2rem;
-  background:linear-gradient(135deg,#1a0a12 0%,#0d0d1a 100%);
-  border:1px solid rgba(232,54,93,0.2);border-radius:var(--r-xl);
-  padding:2.5rem;overflow:hidden;position:relative;
-}
-.mood-section::before{
-  content:'';position:absolute;top:-40px;right:-40px;
-  width:200px;height:200px;border-radius:50%;
-  background:radial-gradient(circle,rgba(232,54,93,0.15),transparent 70%);
-}
-.mood-content{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap}
-.mood-text h2{font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:0.5rem}
-.mood-text p{font-size:0.875rem;color:var(--text2);max-width:340px}
-.mood-btn{
-  display:inline-flex;align-items:center;gap:0.6rem;
-  padding:0.8rem 1.8rem;border-radius:99px;font-weight:600;font-size:0.9rem;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;
-  transition:all var(--transition);white-space:nowrap;
-  box-shadow:0 4px 20px rgba(232,54,93,0.35);
-}
-.mood-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(232,54,93,0.45)}
-
-/* ── MOVIES GRID ── */
-.movies-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-  gap:1rem;
-}
-.movie-card{
-  border-radius:var(--r-lg);overflow:hidden;
-  background:var(--surface);border:1px solid var(--border);
-  transition:all var(--transition);cursor:pointer;position:relative;
-}
-.movie-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.5);border-color:var(--border2)}
-.movie-card:hover .card-overlay{opacity:1}
-.movie-poster{
-  aspect-ratio:2/3;overflow:hidden;background:var(--bg3);position:relative;
-}
-.movie-poster img{width:100%;height:100%;object-fit:cover;transition:transform var(--transition)}
-.movie-card:hover .movie-poster img{transform:scale(1.05)}
-.card-overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(to top,rgba(0,0,0,0.85) 0%,transparent 50%);
-  display:flex;align-items:flex-end;justify-content:center;
-  padding:1rem;opacity:0;transition:opacity var(--transition);
-}
-.card-play-btn{
-  display:flex;align-items:center;gap:0.5rem;
-  padding:0.55rem 1.2rem;border-radius:99px;font-size:0.8rem;font-weight:600;
-  background:var(--accent);color:#fff;
-}
-.card-info{padding:0.75rem}
-.card-title{font-size:0.85rem;font-weight:500;line-height:1.3;margin-bottom:0.25rem;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.card-meta{display:flex;align-items:center;justify-content:space-between;font-size:0.75rem;color:var(--text2)}
-.card-year{}
-.card-rating{display:flex;align-items:center;gap:0.25rem;color:var(--gold)}
-.card-type-badge{
-  position:absolute;top:0.5rem;left:0.5rem;z-index:1;
-  padding:0.2rem 0.5rem;border-radius:4px;font-size:0.68rem;font-weight:600;
-  background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);color:#fff;
-  text-transform:uppercase;letter-spacing:0.05em;
-}
-.card-type-badge.series{background:rgba(24,95,165,0.8)}
-.card-type-badge.movie{background:rgba(163,45,45,0.8)}
-.card-wl-btn{
-  position:absolute;top:0.5rem;right:0.5rem;z-index:1;
-  width:30px;height:30px;border-radius:6px;
-  background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);
-  display:flex;align-items:center;justify-content:center;
-  color:rgba(255,255,255,0.6);font-size:0.75rem;
-  transition:all var(--transition);
-}
-.card-wl-btn:hover,.card-wl-btn.saved{color:var(--accent)}
-.card-poster-placeholder{
-  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-  background:var(--bg3);color:var(--text3);font-size:2.5rem;
-}
-
-/* ── LOAD MORE ── */
-.load-more-btn{
-  display:block;margin:1.5rem auto 0;
-  padding:0.7rem 2rem;border-radius:99px;font-size:0.875rem;font-weight:500;
-  background:var(--bg3);color:var(--text2);border:1px solid var(--border2);
-  transition:all var(--transition);
-}
-.load-more-btn:hover{background:var(--bg4);color:var(--text)}
-
-/* ── NEWS GRID ── */
-.news-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-  gap:1rem;
-}
-.news-card{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
-  overflow:hidden;transition:all var(--transition);cursor:pointer;
-}
-.news-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--border2)}
-.news-thumb{aspect-ratio:16/9;overflow:hidden;background:var(--bg3)}
-.news-thumb img{width:100%;height:100%;object-fit:cover;transition:transform var(--transition)}
-.news-card:hover .news-thumb img{transform:scale(1.04)}
-.news-body{padding:1rem}
-.news-source{font-size:0.72rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem}
-.news-title{font-size:0.9rem;font-weight:500;line-height:1.4;color:var(--text);
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.news-date{font-size:0.75rem;color:var(--text3);margin-top:0.5rem}
-
-/* ── VIDEO MODAL ── */
-.modal-backdrop{
-  position:fixed;inset:0;z-index:300;
-  background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);
-  display:none;align-items:flex-start;justify-content:center;
-  padding:1rem;overflow-y:auto;
-}
-.modal-backdrop.open{display:flex}
-.modal-box{
-  position:relative;width:100%;max-width:940px;
-  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-xl);
-  margin:auto;overflow:hidden;
-}
-.modal-close{
-  position:absolute;top:1rem;right:1rem;z-index:10;
-  width:36px;height:36px;border-radius:var(--r);
-  background:rgba(0,0,0,0.5);color:#fff;font-size:1rem;
-  display:flex;align-items:center;justify-content:center;
-  transition:all var(--transition);
-}
-.modal-close:hover{background:var(--accent)}
-.video-container{position:relative;aspect-ratio:16/9;background:#000}
-#video-player{width:100%;height:100%;border:none}
-.play-overlay{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:opacity var(--transition);
-}
-.play-overlay .play-icon{
-  width:64px;height:64px;border-radius:50%;
-  background:rgba(232,54,93,0.9);display:flex;align-items:center;justify-content:center;
-  font-size:1.5rem;color:#fff;padding-left:4px;
-  box-shadow:0 0 0 12px rgba(232,54,93,0.2);
-  transition:all var(--transition);
-}
-.play-overlay:hover .play-icon{transform:scale(1.1)}
-.modal-body{padding:1.5rem}
-.source-row{
-  display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;
-}
-.src-btn{
-  padding:0.4rem 0.9rem;border-radius:var(--r);font-size:0.78rem;font-weight:500;
-  border:1px solid var(--border2);background:var(--bg3);color:var(--text2);
-  transition:all var(--transition);
-}
-.src-btn:hover{background:var(--bg4);color:var(--text)}
-.src-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.src-btn.green{border-color:rgba(99,153,34,0.5);color:#97c459}
-.src-btn.green.active{background:#3b6d11;color:#eaf3de}
-.modal-actions{display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap}
-.wl-toggle{
-  display:flex;align-items:center;gap:0.5rem;
-  padding:0.5rem 1.1rem;border-radius:var(--r);font-size:0.85rem;font-weight:500;
-  border:1px solid var(--border2);background:var(--bg3);color:var(--text2);
-  transition:all var(--transition);
-}
-.wl-toggle:hover,.wl-toggle.saved{background:rgba(232,54,93,0.12);color:var(--accent);border-color:rgba(232,54,93,0.3)}
-.avail-status{font-size:0.8rem;color:var(--text2);padding:0.4rem 0.8rem;border-radius:var(--r);background:var(--bg3)}
-.ep-selector{
-  display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;
-}
-.ep-selector label{font-size:0.8rem;color:var(--text2);font-weight:500}
-.ep-selector select{
-  background:var(--bg3);border:1px solid var(--border2);color:var(--text);
-  padding:0.4rem 0.75rem;border-radius:var(--r);font-size:0.82rem;font-family:inherit;outline:none;
-  transition:border-color var(--transition);
-}
-.ep-selector select:focus{border-color:var(--accent)}
-.modal-details{display:grid;grid-template-columns:140px 1fr;gap:1.5rem}
-#modal-movie-poster{width:100%;border-radius:var(--r-lg);aspect-ratio:2/3;object-fit:cover;background:var(--bg3)}
-.details-text h2{font-family:var(--font-display);font-size:1.3rem;font-weight:700;margin-bottom:0.6rem;line-height:1.2}
-.details-text p{font-size:0.82rem;color:var(--text2);margin-bottom:0.35rem;line-height:1.5}
-.details-text p strong{color:var(--text);font-weight:500}
-.plot-text{font-size:0.875rem !important;color:var(--text2) !important;line-height:1.6 !important;margin-bottom:0.75rem !important}
-.other-ratings{margin-top:0.5rem}
-.rating-pill{
-  display:inline-flex;align-items:center;gap:0.3rem;
-  padding:0.25rem 0.6rem;border-radius:4px;font-size:0.72rem;font-weight:600;
-  background:var(--bg3);color:var(--text2);margin-right:0.35rem;margin-bottom:0.35rem;
-}
-.recommendations-section{margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border)}
-.rec-title{font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:1rem}
-.rec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:0.75rem}
-
-/* ── NOTIFICATION MODALS ── */
-.notif-backdrop{
-  position:fixed;inset:0;z-index:400;
-  background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);
-  display:none;align-items:center;justify-content:center;padding:1rem;
-}
-.notif-backdrop.open{display:flex}
-.notif-box{
-  background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r-xl);
-  padding:2rem;max-width:540px;width:100%;position:relative;max-height:80vh;overflow-y:auto;
-}
-.notif-box h2{font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:1rem}
-.notif-box h3{font-size:0.95rem;font-weight:600;margin:1.25rem 0 0.5rem}
-.notif-box p{font-size:0.875rem;color:var(--text2);line-height:1.6;margin-bottom:0.75rem}
-.notif-box ul{padding-left:1.2rem;margin-bottom:0.75rem}
-.notif-box li{font-size:0.875rem;color:var(--text2);line-height:1.6;margin-bottom:0.3rem}
-.notif-box li strong{color:var(--text)}
-.notif-close{position:absolute;top:1rem;right:1rem}
-
-/* ── WATCHLIST / CONTINUE ── */
-.section-empty{
-  padding:3rem;text-align:center;
-  background:var(--surface);border:1px dashed var(--border2);border-radius:var(--r-xl);
-}
-.section-empty i{font-size:2.5rem;color:var(--text3);margin-bottom:1rem;display:block}
-.section-empty p{color:var(--text2);font-size:0.875rem}
-
-/* ── FOOTER ── */
-.footer{
-  text-align:center;padding:2rem;
-  border-top:1px solid var(--border);
-  font-size:0.8rem;color:var(--text3);
-}
-.footer a{color:var(--text2);transition:color var(--transition)}
-.footer a:hover{color:var(--accent)}
-
-/* ── SKELETON ── */
-.skeleton{
-  background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);
-  background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:var(--r);
-}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
-/* ── TOAST ── */
-.toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:500;display:flex;flex-direction:column;gap:0.5rem}
-.toast{
-  display:flex;align-items:center;gap:0.75rem;
-  padding:0.75rem 1.25rem;border-radius:var(--r);
-  background:var(--surface2);border:1px solid var(--border2);
-  font-size:0.85rem;font-weight:500;color:var(--text);
-  box-shadow:var(--shadow);
-  animation:slide-in 0.3s ease;max-width:300px;
-}
-.toast i{color:var(--accent)}
-@keyframes slide-in{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-
-/* ── SEARCH RESULTS HEADER ── */
-.results-tag{
-  display:inline-flex;align-items:center;gap:0.4rem;
-  background:var(--bg3);border:1px solid var(--border);border-radius:99px;
-  padding:0.25rem 0.75rem;font-size:0.78rem;color:var(--text2);margin-bottom:1rem;
-}
-.results-tag span{color:var(--accent);font-weight:600}
-
-/* ── BACK TO TOP ── */
-.back-top{
-  position:fixed;bottom:1.5rem;left:1.5rem;z-index:99;
-  width:40px;height:40px;border-radius:var(--r);
-  background:var(--surface2);border:1px solid var(--border2);
-  color:var(--text2);display:flex;align-items:center;justify-content:center;
-  transition:all var(--transition);opacity:0;pointer-events:none;
-}
-.back-top.visible{opacity:1;pointer-events:all}
-.back-top:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
-
-/* ── RESPONSIVE ── */
-@media(max-width:768px){
-  .navbar-nav,.navbar-controls .theme-toggle-btn{display:none}
-  .hamburger{display:flex}
-  .hero{min-height:75vh;padding:calc(var(--navbar-h) + 1rem) 1.25rem 2rem}
-  .hero-title{font-size:clamp(1.8rem,7vw,3rem)}
-  .hero-sub{display:none}
-  .stats-bar{gap:1.25rem;padding:1rem 1.25rem}
-  .section{padding:1.5rem 1.25rem}
-  .mood-section{margin:0 1.25rem 1.5rem;padding:1.5rem}
-  .mood-content{flex-direction:column;align-items:flex-start}
-  .movies-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.75rem}
-  .news-grid{grid-template-columns:1fr}
-  .modal-details{grid-template-columns:1fr}
-  #modal-movie-poster{display:none}
-  .navbar-controls{gap:0.25rem}
-  .modal-body{padding:1rem}
-  .notif-box{padding:1.5rem}
-}
-@media(max-width:480px){
-  .movies-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:0.6rem}
-  .search-wrap{border-radius:var(--r)}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NowShowing</title>
+    <meta name="description" content="Search and stream movies and TV shows from multiple sources with a clean, responsive UI. Stay updated with the latest entertainment news.">
+    <meta name="theme-color" content="#e50914">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
+    <link rel="preload" href="app.js" as="script">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e50914'/%3E%3Ctext x='50' y='58' font-size='54' text-anchor='middle' fill='white' font-family='Arial, Helvetica, sans-serif'%3ENS%3C/text%3E%3C/svg%3E">
 </head>
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar" id="navbar">
-  <div class="navbar-brand"><a href="#">NowShowing</a></div>
-  <ul class="navbar-nav" id="main-nav">
-    <li><a href="#" class="active" id="home-nav">Home</a></li>
-    <li><a href="#" id="movies-nav-link">Movies</a></li>
-    <li><a href="#" id="tv-shows-nav-link">TV Shows</a></li>
-    <li><a href="#" id="watchlist-nav-link">Watchlist</a></li>
-    <li><a href="#" id="continue-nav-link">Continue</a></li>
-  </ul>
-  <div class="navbar-controls">
-    <button class="theme-toggle-btn" id="theme-toggle-btn" title="Toggle theme"><i class="fas fa-moon" id="theme-icon"></i></button>
-    <div class="icon-btn-wrap">
-      <button class="icon-btn" id="notification-button" title="Tips"><i class="fas fa-bell"></i><span class="badge"></span></button>
-    </div>
-    <button class="icon-btn" id="developer-message-button" title="About"><i class="fas fa-info-circle"></i></button>
-  </div>
-  <button class="hamburger" id="hamburger-menu"><i class="fas fa-bars"></i></button>
-</nav>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="#">NowShowing</a>
+        </div>
+        <ul class="navbar-nav" id="main-nav">
+            <li><a href="#">Home</a></li>
+            <li><a href="#" id="movies-nav-link">Movies</a></li>
+            <li><a href="#" id="tv-shows-nav-link">TV Shows</a></li>
+            <li><a href="#" id="watchlist-nav-link">Watchlist</a></li>
+            <li><a href="#" id="continue-nav-link">Continue</a></li>
+        </ul>
+        <div class="navbar-controls">
+            <div class="theme-switch">
+                <input type="checkbox" id="theme-toggle" class="theme-toggle">
+                <label for="theme-toggle"></label>
+            </div>
+            <button class="notification-button" id="notification-button" aria-label="Notifications">
+                <i class="fas fa-bell" aria-hidden="true"></i>
+            </button>
+            <button class="developer-message-button" id="developer-message-button" aria-label="Developer Message">
+                <i class="fas fa-info-circle" aria-hidden="true"></i>
+            </button>
+        </div>
+        <button class="hamburger-menu" id="hamburger-menu" aria-label="Open mobile menu">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+    </nav>
 
-<!-- MOBILE DRAWER -->
-<div class="mobile-overlay" id="mobile-overlay"></div>
-<div class="mobile-drawer" id="mobile-drawer">
-  <div class="brand">NowShowing</div>
-  <button class="icon-btn drawer-close" id="drawer-close"><i class="fas fa-times"></i></button>
-  <ul>
-    <li><a href="#" id="mobile-home-nav">Home</a></li>
-    <li><a href="#" id="mobile-movies-nav-link">Movies</a></li>
-    <li><a href="#" id="mobile-tv-shows-nav-link">TV Shows</a></li>
-    <li><a href="#" id="mobile-watchlist-nav-link">Watchlist</a></li>
-    <li><a href="#" id="mobile-continue-nav-link">Continue</a></li>
-    <li style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border)">
-      <a href="#" id="mobile-theme-toggle">Toggle Theme</a>
-    </li>
-  </ul>
-</div>
+    <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+        <ul class="mobile-nav-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#" id="mobile-movies-nav-link">Movies</a></li>
+            <li><a href="#" id="mobile-tv-shows-nav-link">TV Shows</a></li>
+            <li><a href="#" id="mobile-watchlist-nav-link">Watchlist</a></li>
+            <li><a href="#" id="mobile-continue-nav-link">Continue</a></li>
+        </ul>
+    </div>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-bg-overlay"></div>
-  <div class="hero-content">
-    <div class="hero-eyebrow"><i class="fas fa-circle" style="font-size:0.5rem"></i> Free Streaming</div>
-    <h1 class="hero-title">Find Something to <span>Watch Tonight.</span></h1>
-    <p class="hero-sub">Thousands of movies and shows, multiple sources, zero subscriptions. Best experienced on Brave Browser.</p>
-    <div class="search-wrap">
-      <i class="fas fa-search" style="padding-left:1.25rem;color:var(--text3);font-size:0.875rem"></i>
-      <input type="text" id="search-input" placeholder="Search movies, TV shows...">
-      <button id="search-button"><i class="fas fa-arrow-right"></i> Search</button>
-    </div>
-    <div class="type-filters" id="search-type-filter">
-      <button class="type-filter-btn active" data-type="">All</button>
-      <button class="type-filter-btn" data-type="movie">Movies</button>
-      <button class="type-filter-btn" data-type="series">TV Shows</button>
-    </div>
-  </div>
+    <section class="hero-section">
+        <div class="hero-content"><br> <br> <br> <br> <br> 
+            <h1 class="hero-title"> Find Something to Distract You From the Void.</h1>
+            <p class="hero-subtitle">
+NowShowing pulls in third-party streams — some shady, some straight-up cursed.Those “free” movies come packed with pop-ups, redirects, and malware that mocks your will to live.<br>
+
+Click “Play” if you want to risk your time, your browser, or your dignity. The button offers entertainment; the void offers perspective. Use legal sources or Brave for a less apocalyptic experience,though nothing truly saves you from the void.
+</p>
+
+
+            <br><br>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Search for a movie or TV show...">
+                <button id="search-button" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></button>
+            </div>
+            <div class="search-type-filter" id="search-type-filter" aria-label="Filter search by type">
+                <button class="type-filter-btn active" data-type="" aria-pressed="true">All</button>
+                <button class="type-filter-btn" data-type="movie" aria-pressed="false">Movies</button>
+                <button class="type-filter-btn" data-type="series" aria-pressed="false">TV Shows</button>
+            </div>
+        </div>
+        <br><br>
+    </section>
+
+    <br> <br> 
+    <main>
+
+
+
+
+
+
+        
+<br> <br> <br>
+    <section class="discover-section">
+  <h2>Discover Movies by Mood</h2>
+  <button class="visit-button" onclick="window.location.href='https://smile-plzz.github.io/MovieRecommendationBasedOnMood/'">
+    Explore Now
+  </button>
 </section>
 
-<!-- STATS BAR -->
-<div class="stats-bar">
-  <div class="stat-item"><span class="stat-num">6+</span><span class="stat-label">Stream Sources</span></div>
-  <div class="stat-item"><span class="stat-num">4K</span><span class="stat-label">HD Quality</span></div>
-  <div class="stat-item"><span class="stat-num">Free</span><span class="stat-label">No Subscription</span></div>
-  <div class="stat-item"><span class="stat-num">Any</span><span class="stat-label">Device, Anytime</span></div>
-</div>
+<style>
+  .discover-section {
+    text-align: center;
+    margin-top: 2rem;
+  }
 
-<main id="main-content">
+  .discover-section h2 {
+    display: block;
+    font-size: 1.5em;
+    margin-block-start: 0.83em;
+    margin-block-end: 0.83em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
+    color: var(--text-light, #fff); /* uses theme color if available */
+  }
 
-  <!-- MOOD DISCOVER -->
-  <div class="mood-section">
-    <div class="mood-content">
-      <div class="mood-text">
-        <h2>🎭 Discover Movies by Mood</h2>
-        <p>Not sure what to watch? Let your current vibe guide you to the perfect film.</p>
-      </div>
-      <a href="https://smile-plzz.github.io/MovieRecommendationBasedOnMood/" target="_blank" class="mood-btn">
-        <i class="fas fa-magic"></i> Explore by Mood
-      </a>
+  .visit-button {
+    background: linear-gradient(90deg, #ff5f6d, #ffc371);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.8rem 1.8rem;
+    border: none;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(255, 99, 71, 0.3);
+  }
+
+  .visit-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(255, 99, 71, 0.4);
+  }
+
+  .visit-button:active {
+    transform: scale(0.98);
+  }
+</style>
+
+
+
+        
+        
+
+        
+        <section class="movies-section" id="continue-watching-section" style="display: none;">
+            <h2>Continue Watching</h2>
+            <div class="movies-grid" id="continue-watching-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="movies-section" id="watchlist-section" style="display: none;">
+            <h2>Your Watchlist</h2>
+            <div class="movies-grid" id="watchlist-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="movies-section">
+            <h2>Popular Movies</h2>
+            <div class="movies-grid" id="popular-movies" aria-live="polite"></div>
+            <button id="load-more-popular" class="load-more-button">Load More</button>
+        </section>
+
+        <section class="movies-section" style="display: none;">
+            <h2 id="search-results-heading">Search Results</h2>
+            <div class="movies-grid" id="search-results" aria-live="polite"></div>
+            <button id="load-more-search" class="load-more-button">Load More</button>
+        </section>
+
+        <section class="movies-section" style="display: none;">
+            <h2>Popular TV Shows</h2>
+            <div class="movies-grid" id="popular-tv-shows" aria-live="polite"></div>
+            <button id="load-more-popular-tv" class="load-more-button">Load More</button>
+        </section>
+
+        <section class="news-section">
+            <h2>Latest News</h2>
+            <div class="news-grid" id="news-grid" aria-live="polite"></div>
+            <button id="load-more-news" class="load-more-button" style="display: none;">Load More News</button>
+        </section>
+    </main>
+
+    <div class="video-modal" id="video-modal" role="dialog" aria-modal="true" aria-labelledby="modal-movie-title">
+        <div class="modal-content">
+            <button class="close-button" aria-label="Close">&times;</button>
+            <div class="source-buttons" id="source-buttons"></div>
+            <div class="modal-actions">
+                <button id="watchlist-toggle" class="watchlist-toggle" aria-pressed="false">
+                    <i class="fas fa-bookmark" aria-hidden="true"></i>
+                    <span class="watchlist-toggle-text">Add to Watchlist</span>
+                </button>
+            </div>
+            <div id="season-episode-selector" style="display: none;">
+                <label for="season-select">Season:</label>
+                <select id="season-select"></select>
+                <label for="episode-select">Episode:</label>
+                <select id="episode-select"></select>
+            </div>
+            <div id="video-availability-status"></div>
+            <div class="video-player-container">
+                <iframe id="video-player" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; encrypted-media"></iframe>
+                <div class="play-overlay" id="video-play-overlay">
+                    <i class="fas fa-play"></i>
+                </div>
+            </div>
+            <div class="video-details-container">
+                <img id="modal-movie-poster" src="" alt="Movie Poster">
+                <div class="video-details">
+                    <h2 id="modal-movie-title"></h2>
+                    <p id="modal-movie-plot"></p>
+                    <p><strong>Genre:</strong> <span id="modal-movie-genre"></span></p>
+                    <p><strong>Released:</strong> <span id="modal-movie-released"></span></p>
+                    <p><strong>Rating:</strong> <span id="modal-movie-rating"></span></p>
+                    <p><strong>Rated:</strong> <span id="modal-movie-rated"></span></p>
+                    <div id="modal-movie-other-ratings"></div>
+                    <p><strong>Director:</strong> <span id="modal-movie-director"></span></p>
+                    <p><strong>Writer:</strong> <span id="modal-movie-writer"></span></p>
+                    <p><strong>Actors:</strong> <span id="modal-movie-actors"></span></p>
+                    <p><strong>Awards:</strong> <span id="modal-movie-awards"></span></p>
+                    <p><strong>Runtime:</strong> <span id="modal-movie-runtime"></span></p>
+                    <p><strong>Language:</strong> <span id="modal-movie-language"></span></p>
+                    <p><strong>Country:</strong> <span id="modal-movie-country"></span></p>
+                    <p><strong>Metascore:</strong> <span id="modal-movie-metascore"></span></p>
+                    <p><strong>Box Office:</strong> <span id="modal-movie-boxoffice"></span></p>
+                    <p><strong>Production:</strong> <span id="modal-movie-production"></span></p>
+                    <p><strong>Website:</strong> <span id="modal-movie-website"></span></p>
+                </div>
+            </div>
+            
+            <div class="recommendations-section" id="recommendations-section" style="display: none;">
+                <h3>You might also like:</h3>
+                <div class="movies-grid small-grid" id="recommendations-grid">
+                    </div>
+            </div>
+            </div>
     </div>
-  </div>
 
-  <!-- CONTINUE WATCHING -->
-  <section class="section" id="continue-watching-section" style="display:none">
-    <div class="section-header">
-      <h2 class="section-title"><span>Continue</span> Watching</h2>
-    </div>
-    <div class="movies-grid" id="continue-watching-grid"></div>
-  </section>
-
-  <!-- WATCHLIST -->
-  <section class="section" id="watchlist-section" style="display:none">
-    <div class="section-header">
-      <h2 class="section-title">Your <span>Watchlist</span></h2>
-    </div>
-    <div class="movies-grid" id="watchlist-grid"></div>
-  </section>
-
-  <!-- POPULAR MOVIES -->
-  <section class="section" id="popular-movies-section">
-    <div class="section-header">
-      <h2 class="section-title">Popular <span>Movies</span></h2>
-    </div>
-    <div class="movies-grid" id="popular-movies"></div>
-    <button class="load-more-btn" id="load-more-popular">Load More</button>
-  </section>
-
-  <!-- SEARCH RESULTS -->
-  <section class="section" id="search-results-section" style="display:none">
-    <div class="section-header">
-      <h2 class="section-title" id="search-results-heading">Search Results</h2>
-    </div>
-    <div class="movies-grid" id="search-results"></div>
-    <button class="load-more-btn" id="load-more-search">Load More</button>
-  </section>
-
-  <!-- POPULAR TV SHOWS -->
-  <section class="section" id="popular-tv-section" style="display:none">
-    <div class="section-header">
-      <h2 class="section-title">Popular <span>TV Shows</span></h2>
-    </div>
-    <div class="movies-grid" id="popular-tv-shows"></div>
-    <button class="load-more-btn" id="load-more-popular-tv">Load More</button>
-  </section>
-
-  <!-- NEWS -->
-  <section class="section" id="news-section">
-    <div class="section-header">
-      <h2 class="section-title">Latest <span>News</span></h2>
-    </div>
-    <div class="news-grid" id="news-grid"></div>
-    <button class="load-more-btn" id="load-more-news" style="display:none">Load More</button>
-  </section>
-
-</main>
-
-<!-- VIDEO MODAL -->
-<div class="modal-backdrop" id="video-modal" role="dialog" aria-modal="true">
-  <div class="modal-box">
-    <button class="modal-close" id="modal-close-btn"><i class="fas fa-times"></i></button>
-    <div class="video-container">
-      <iframe id="video-player" allowfullscreen allow="autoplay; fullscreen; picture-in-picture; encrypted-media"></iframe>
-      <div class="play-overlay" id="video-play-overlay"><div class="play-icon"><i class="fas fa-play"></i></div></div>
-    </div>
-    <div class="modal-body">
-      <div class="source-row" id="source-buttons"></div>
-      <div class="modal-actions">
-        <button class="wl-toggle" id="watchlist-toggle">
-          <i class="fas fa-bookmark"></i>
-          <span class="watchlist-toggle-text">Add to Watchlist</span>
-        </button>
-        <div class="avail-status" id="video-availability-status" style="display:none"></div>
-      </div>
-      <div class="ep-selector" id="season-episode-selector" style="display:none">
-        <label for="season-select">Season</label>
-        <select id="season-select"></select>
-        <label for="episode-select">Episode</label>
-        <select id="episode-select"></select>
-      </div>
-      <div class="modal-details">
-        <img id="modal-movie-poster" src="" alt="Poster">
-        <div class="details-text">
-          <h2 id="modal-movie-title"></h2>
-          <p class="plot-text" id="modal-movie-plot"></p>
-          <p><strong>Genre:</strong> <span id="modal-movie-genre"></span></p>
-          <p><strong>Released:</strong> <span id="modal-movie-released"></span></p>
-          <p><strong>Rating:</strong> <span id="modal-movie-rating"></span></p>
-          <p><strong>Rated:</strong> <span id="modal-movie-rated"></span></p>
-          <div class="other-ratings" id="modal-movie-other-ratings"></div>
-          <p><strong>Director:</strong> <span id="modal-movie-director"></span></p>
-          <p><strong>Writer:</strong> <span id="modal-movie-writer"></span></p>
-          <p><strong>Actors:</strong> <span id="modal-movie-actors"></span></p>
-          <p><strong>Awards:</strong> <span id="modal-movie-awards"></span></p>
-          <p><strong>Runtime:</strong> <span id="modal-movie-runtime"></span></p>
-          <p><strong>Language:</strong> <span id="modal-movie-language"></span></p>
-          <p><strong>Country:</strong> <span id="modal-movie-country"></span></p>
-          <p><strong>Metascore:</strong> <span id="modal-movie-metascore"></span></p>
-          <p><strong>Box Office:</strong> <span id="modal-movie-boxoffice"></span></p>
-          <p><strong>Production:</strong> <span id="modal-movie-production"></span></p>
-          <p><strong>Website:</strong> <span id="modal-movie-website"></span></p>
+    <div class="notification-modal" id="notification-modal" role="dialog" aria-modal="true" aria-labelledby="notification-title">
+        <div class="modal-content">
+            <button class="close-button" id="close-notification-modal" aria-label="Close">&times;</button>
+            <h2 class="notification-title">⚠️ Best Viewed on Brave Browser</h2>
+            <p>NowShowing works best with Brave Browser due to its aggressive ad and tracker blocking capabilities, which significantly improve performance and reduce interruptions from third-party streaming sources.</p>
+            <p>While other browsers may work, Brave offers:</p>
+            <ul>
+                <li><strong>Better playback stability</strong> across streaming sources</li>
+                <li><strong>Fewer pop-ups, redirects, and unwanted ads</strong></li>
+                <li><strong>Faster loading</strong> with enhanced privacy</li>
+            </ul>
+            <p>We highly recommend Brave for the smoothest viewing experience.</p>
+            <h3 class="notification-subtitle">Why This Matters</h3>
+            <p>NowShowing pulls in video streams via third-party embedded players like VidSrc, SuperEmbed, 2Embed, and others. These sources often:</p>
+            <ul>
+                <li>Inject ads/popups before or during playback</li>
+                <li>Redirect users to unrelated pages</li>
+                <li>Load extra scripts that slow down or break the experience</li>
+                <li>Behave inconsistently across browsers depending on ad blockers or script permissions</li>
+            </ul>
+            <p>This makes the experience unreliable in default browsers like Chrome, Edge, or Safari — unless heavily modified with extensions.</p>
+            <h3 class="notification-subtitle">Why Brave?</h3>
+            <p>Brave is built with a focus on privacy and performance. It automatically blocks ads and trackers by default, which is particularly beneficial when dealing with third-party video embeds that often come with intrusive advertising and tracking scripts. This leads to:</p>
+            <ul>
+                <li><strong>Reduced resource consumption:</strong> Less data downloaded, faster page loads.</li>
+                <li><strong>Enhanced privacy:</strong> Protection against unwanted tracking.</li>
+                <li><strong>Fewer interruptions:</strong> A cleaner viewing experience without pop-ups or redirects.</li>
+            </ul>
+            <p>While we strive to make NowShowing work across all browsers, the nature of third-party video sources means that a browser like Brave, with its built-in protections, can offer a significantly smoother and more reliable streaming experience.</p>
         </div>
-      </div>
-      <div class="recommendations-section" id="recommendations-section" style="display:none">
-        <p class="rec-title">You might also like</p>
-        <div class="rec-grid" id="recommendations-grid"></div>
-      </div>
     </div>
-  </div>
-</div>
 
-<!-- NOTIFICATION MODAL -->
-<div class="notif-backdrop" id="notification-modal" role="dialog">
-  <div class="notif-box">
-    <button class="icon-btn notif-close" id="close-notification-modal"><i class="fas fa-times"></i></button>
-    <h2>⚠️ Best Viewed on Brave Browser</h2>
-    <p>NowShowing works best with Brave Browser due to its aggressive ad and tracker blocking capabilities, which significantly improve performance and reduce interruptions from third-party streaming sources.</p>
-    <h3>Why This Matters</h3>
-    <p>NowShowing pulls in video streams via third-party embedded players like VidSrc, SuperEmbed, 2Embed, and others. These sources often inject ads/popups, redirect users, and load extra scripts that slow down the experience.</p>
-    <h3>Benefits of Brave</h3>
-    <ul>
-      <li><strong>Better playback stability</strong> across all sources</li>
-      <li><strong>Fewer pop-ups, redirects, and unwanted ads</strong></li>
-      <li><strong>Faster loading</strong> with enhanced privacy</li>
-      <li><strong>Reduced resource consumption</strong></li>
-    </ul>
-  </div>
-</div>
-
-<!-- SWITCH SOURCE MODAL -->
-<div class="notif-backdrop" id="switch-source-notification-modal" role="dialog">
-  <div class="notif-box">
-    <button class="icon-btn notif-close" id="close-switch-source-notification"><i class="fas fa-times"></i></button>
-    <h2>Having Trouble With This Stream?</h2>
-    <p>Video streams can be unreliable due to ad blockers, geo-restrictions, source overload, or temporary downtime.</p>
-    <h3>What You Can Do</h3>
-    <ul>
-      <li><strong>Try Other Sources:</strong> Use the source buttons below the player — green usually means available.</li>
-      <li><strong>Disable Ad Blocker:</strong> Try disabling it temporarily and reloading.</li>
-      <li><strong>Try a Different Browser:</strong> Brave works best for this site.</li>
-      <li><strong>Check Your Connection:</strong> Ensure your network is stable.</li>
-    </ul>
-  </div>
-</div>
-
-<!-- DEVELOPER MESSAGE -->
-<div class="notif-backdrop" id="developer-message-modal" role="dialog">
-  <div class="notif-box">
-    <button class="icon-btn notif-close" id="close-developer-message-modal"><i class="fas fa-times"></i></button>
-    <h2>A Message from the Developer</h2>
-    <p>Hey — I'm Ismail Hossain, a developer, educator, and media tinkerer from Dhaka, Bangladesh. When I'm not flying my drone for documentary shoots or helping teachers level up with tech, I like to build weekend projects that make life easier (or just more fun).</p>
-    <p>NowShowing is one of those. Built to search movies & shows easily, stream from multiple sources, catch the latest movie news, and enjoy a clean responsive UI.</p>
-    <p>This isn't backed by a studio — just something I put together with a lot of coffee and curiosity. Hope it makes your watchlist nights smoother.</p>
-    <p><strong>Contact:</strong> ismailhossain013@gmail.com<br>
-    <a href="https://github.com/smile-plzz" target="_blank" style="color:var(--accent)">GitHub: smile-plzz</a></p>
-    <p style="margin-top:0.75rem;font-size:0.8rem;color:var(--text3)">Fun fact: I also run a small video production firm called 15 Miles — drone films, documentaries, and creative content.</p>
-  </div>
-</div>
-
-<!-- TOAST CONTAINER -->
-<div class="toast-container" id="toast-container"></div>
-
-<!-- BACK TO TOP -->
-<button class="back-top" id="back-top" title="Back to top"><i class="fas fa-arrow-up"></i></button>
-
-<footer class="footer">
-  <p>&copy; 2025 NowShowing — <a href="#">Powered by OMDb & VidSrc</a> — Built with ☕ by <a href="https://github.com/smile-plzz" target="_blank">Ismail Hossain</a></p>
-</footer>
-
-<link rel="manifest" href="/manifest.webmanifest">
-<script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('/service-worker.js'));
-}
-
-/* ─── THEME ─── */
-(function(){
-  const saved = localStorage.getItem('ns_theme') || 'dark';
-  if(saved === 'light') document.documentElement.setAttribute('data-theme','light');
-})();
-
-/* ─── DOM REFS ─── */
-const $ = id => document.getElementById(id);
-const $$ = sel => document.querySelectorAll(sel);
-
-/* ─── TOAST ─── */
-function showToast(msg, icon='check-circle'){
-  const t = document.createElement('div');
-  t.className='toast';
-  t.innerHTML=`<i class="fas fa-${icon}"></i>${msg}`;
-  $('toast-container').appendChild(t);
-  setTimeout(()=>t.style.animation='slide-in 0.3s ease reverse',2700);
-  setTimeout(()=>t.remove(),3000);
-}
-
-/* ─── THEME TOGGLE ─── */
-function applyTheme(t){
-  if(t==='light'){document.documentElement.setAttribute('data-theme','light');$('theme-icon').className='fas fa-sun';}
-  else{document.documentElement.removeAttribute('data-theme');$('theme-icon').className='fas fa-moon';}
-  localStorage.setItem('ns_theme',t);
-}
-$('theme-toggle-btn').onclick=()=>{
-  const cur=localStorage.getItem('ns_theme')||'dark';
-  applyTheme(cur==='dark'?'light':'dark');
-};
-$('mobile-theme-toggle').onclick=(e)=>{e.preventDefault();$('theme-toggle-btn').click();closeDrawer();};
-(function(){const s=localStorage.getItem('ns_theme')||'dark';applyTheme(s);})();
-
-/* ─── HAMBURGER ─── */
-function openDrawer(){$('mobile-overlay').classList.add('open');$('mobile-drawer').classList.add('open');}
-function closeDrawer(){$('mobile-overlay').classList.remove('open');$('mobile-drawer').classList.remove('open');}
-$('hamburger-menu').onclick=openDrawer;
-$('mobile-overlay').onclick=closeDrawer;
-$('drawer-close').onclick=closeDrawer;
-
-/* ─── BACK TO TOP ─── */
-window.addEventListener('scroll',()=>{
-  $('back-top').classList.toggle('visible',window.scrollY>400);
-});
-$('back-top').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
-
-/* ─── MODALS (notification/dev) ─── */
-function openNotif(id){$(id).classList.add('open');}
-function closeNotif(id){$(id).classList.remove('open');}
-$('notification-button').onclick=()=>openNotif('notification-modal');
-$('close-notification-modal').onclick=()=>closeNotif('notification-modal');
-$('developer-message-button').onclick=()=>openNotif('developer-message-modal');
-$('close-developer-message-modal').onclick=()=>closeNotif('developer-message-modal');
-$('close-switch-source-notification').onclick=()=>closeNotif('switch-source-notification-modal');
-
-/* ─── CLOSE NOTIF BACKDROPS ON CLICK ─── */
-$$('.notif-backdrop').forEach(b=>b.addEventListener('click',e=>{if(e.target===b)b.classList.remove('open');}));
-
-/* ─── VIDEO MODAL CLOSE ─── */
-$('modal-close-btn').onclick=closeVideoModal;
-$('video-modal').addEventListener('click',e=>{if(e.target===$('video-modal'))closeVideoModal();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeVideoModal();$$('.notif-backdrop').forEach(b=>b.classList.remove('open'));}});
-
-/* ─── SEARCH TYPE FILTER ─── */
-$$('.type-filter-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    $$('.type-filter-btn').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-pressed','false');});
-    btn.classList.add('active');btn.setAttribute('aria-pressed','true');
-  });
-});
-
-/* ─── NAV ACTIVE STATE ─── */
-function setActiveNav(id){
-  $$('.navbar-nav a').forEach(a=>a.classList.remove('active'));
-  if($(id))$(id).classList.add('active');
-}
-
-/* ─── CARD CREATION ─── */
-function makeCard(item, isSmall=false){
-  const card = document.createElement('div');
-  card.className = 'movie-card';
-  const imdbId = item.imdbID || item.id || '';
-  const type = item.Type || item.type || 'movie';
-  const title = item.Title || item.name || item.title || '';
-  const year = item.Year || item.year || '';
-  const poster = item.Poster && item.Poster!=='N/A' ? item.Poster : null;
-  const rating = item.imdbRating || item.rating || '';
-  const inWL = isInWatchlist(imdbId);
-
-  card.innerHTML=`
-    <div class="movie-poster">
-      ${poster ? `<img src="${poster}" alt="${title}" loading="lazy">` : `<div class="card-poster-placeholder"><i class="fas fa-film"></i></div>`}
-      <div class="card-overlay"><div class="card-play-btn"><i class="fas fa-play"></i> Play</div></div>
-      <span class="card-type-badge ${type}">${type==='series'?'TV':type}</span>
-      <button class="card-wl-btn ${inWL?'saved':''}" data-id="${imdbId}" title="${inWL?'Remove from':'Add to'} Watchlist">
-        <i class="fas fa-bookmark"></i>
-      </button>
+    <div class="notification-modal" id="switch-source-notification-modal" role="dialog" aria-modal="true" aria-labelledby="switch-source-notification-title">
+        <div class="modal-content">
+            <button class="close-button" id="close-switch-source-notification" aria-label="Close">&times;</button>
+            <h2 class="notification-title">Having trouble with this stream?</h2>
+            <p>Video streams can sometimes be unreliable due to various factors, including:</p>
+            <ul>
+                <li><strong>Browser Ad Blockers:</strong> Aggressive ad blockers might interfere with the video player.</li>
+                <li><strong>Geographical Restrictions:</strong> Some sources may not be available in your region.</li>
+                <li><strong>Source Overload:</strong> High traffic on a source can lead to buffering or playback issues.</li>
+                <li><strong>Temporary Issues:</strong> The video source might be temporarily down or experiencing technical difficulties.</li>
+            </ul>
+            <p><strong>What you can do:</strong></p>
+            <ul>
+                <li><strong>Try Other Sources:</strong> Click the green or red source buttons below the video player to switch to an alternative. Green indicates a likely available source, but all are worth trying.</li>
+                <li><strong>Disable Ad Blocker (Temporarily):</strong> If you're using an ad blocker, try disabling it for this site and reloading the page.</li>
+                <li><strong>Try a Different Browser:</strong> Some browsers handle embeds differently.</li>
+                <li><strong>Check Your Internet Connection:</strong> Ensure your network is stable.</li>
+            </ul>
+            <p>We strive to provide multiple options for a seamless experience. Thank you for your patience!</p>
+        </div>
     </div>
-    <div class="card-info">
-      <div class="card-title">${title}</div>
-      <div class="card-meta">
-        <span class="card-year">${year}</span>
-        ${rating && rating!=='N/A' ? `<span class="card-rating"><i class="fas fa-star" style="font-size:0.65rem"></i>${rating}</span>` : ''}
-      </div>
-    </div>`;
 
-  card.querySelector('.movie-poster').addEventListener('click',()=>openModal(imdbId, type, title));
-  card.querySelector('.card-play-btn').addEventListener('click',e=>{e.stopPropagation();openModal(imdbId, type, title);});
-  card.querySelector('.card-wl-btn').addEventListener('click',e=>{e.stopPropagation();toggleWatchlist(item);e.currentTarget.classList.toggle('saved');});
-  return card;
-}
+    <div class="notification-modal" id="developer-message-modal" role="dialog" aria-modal="true" aria-labelledby="developer-message-title">
+        <div class="modal-content">
+            <button class="close-button" id="close-developer-message-modal" aria-label="Close">&times;</button>
+            <h2 class="notification-title" id="developer-message-title">A Message from the Developer</h2>
+            <p>Hey there — I’m Ismail Hossain, a developer, educator, and media tinkerer from Dhaka, Bangladesh.
+            When I’m not flying my drone for documentary shoots or helping teachers level up with tech, I like to build weekend projects that make life a little easier (or just more fun).</p>
 
-/* ─── LOCAL STORAGE HELPERS ─── */
-function getWatchlist(){return JSON.parse(localStorage.getItem('ns_watchlist')||'[]');}
-function saveWatchlist(wl){localStorage.setItem('ns_watchlist',JSON.stringify(wl));}
-function isInWatchlist(id){return getWatchlist().some(i=>i.imdbID===id);}
-function toggleWatchlist(item){
-  let wl=getWatchlist();
-  const idx=wl.findIndex(i=>i.imdbID===item.imdbID);
-  if(idx>-1){wl.splice(idx,1);showToast('Removed from Watchlist','bookmark');}
-  else{wl.unshift(item);showToast('Added to Watchlist','bookmark');}
-  saveWatchlist(wl);
-  if($$('#watchlist-section')[0] && !$$('#watchlist-section')[0].style.display.includes('none')) renderWatchlist();
-}
-function getContinue(){return JSON.parse(localStorage.getItem('ns_continue')||'[]');}
-function saveContinue(c){localStorage.setItem('ns_continue',JSON.stringify(c));}
-function addToContinue(item){
-  let c=getContinue().filter(i=>i.imdbID!==item.imdbID);
-  c.unshift(item);c=c.slice(0,20);saveContinue(c);
-}
-function renderWatchlist(){
-  const wl=getWatchlist();const grid=$('watchlist-grid');grid.innerHTML='';
-  if(!wl.length){grid.innerHTML='<div class="section-empty"><i class="fas fa-bookmark"></i><p>Your watchlist is empty. Start saving movies and shows!</p></div>';return;}
-  wl.forEach(i=>grid.appendChild(makeCard(i)));
-}
-function renderContinue(){
-  const c=getContinue();const grid=$('continue-watching-grid');grid.innerHTML='';
-  if(!c.length){grid.innerHTML='<div class="section-empty"><i class="fas fa-history"></i><p>Nothing to continue yet. Start watching something!</p></div>';return;}
-  c.forEach(i=>grid.appendChild(makeCard(i)));
-}
+            <p>NowShowing is one of those.
+            I was tired of bouncing between unreliable streaming sites, so I built this app to:</p>
+            <ul>
+                <li>Help you search for movies & shows easily</li>
+                <li>Stream from multiple sources — switch anytime</li>
+                <li>Catch up on the latest movie buzz via the built-in news widget</li>
+                <li>Enjoy a clean, responsive UI that works on any device</li>
+                <li>Get smart stream status indicators (green = probably working)</li>
+            </ul>
+            <p>This isn’t backed by a studio or company — just something I put together with a lot of coffee and curiosity.
+            Hope it makes your watchlist nights smoother.</p>
 
-/* ─── VIDEO MODAL ─── */
-let currentIMDb='', currentType='', currentTitle='';
-function openModal(imdbId, type, title){
-  currentIMDb=imdbId;currentType=type;currentTitle=title;
-  $('video-modal').classList.add('open');
-  document.body.style.overflow='hidden';
-  loadModalData(imdbId, type);
-  addToContinue({imdbID:imdbId, Type:type, Title:title, Poster:'N/A', Year:''});
-  updateContinueSection();
-}
-function closeVideoModal(){
-  $('video-modal').classList.remove('open');
-  document.body.style.overflow='';
-  $('video-player').src='';
-}
-function updateContinueSection(){
-  const c=getContinue();
-  const sec=$('continue-watching-section');
-  if(c.length){sec.style.display='';renderContinue();}
-}
-function loadModalData(imdbId, type){
-  const sections=['modal-movie-title','modal-movie-plot','modal-movie-genre','modal-movie-released','modal-movie-rating','modal-movie-rated','modal-movie-director','modal-movie-writer','modal-movie-actors','modal-movie-awards','modal-movie-runtime','modal-movie-language','modal-movie-country','modal-movie-metascore','modal-movie-boxoffice','modal-movie-production','modal-movie-website'];
-  sections.forEach(id=>{const el=$(id);if(el)el.textContent='Loading...';});
-  $('modal-movie-other-ratings').innerHTML='';
-  $('source-buttons').innerHTML='';
-  $('season-episode-selector').style.display='none';
-  $('recommendations-section').style.display='none';
-  $('video-availability-status').style.display='none';
-  $('video-player').src='';
-  $('video-play-overlay').style.display='flex';
-  
-  const wlBtn=$('watchlist-toggle');
-  const inWL=isInWatchlist(imdbId);
-  wlBtn.classList.toggle('saved',inWL);
-  wlBtn.querySelector('.watchlist-toggle-text').textContent=inWL?'Remove from Watchlist':'Add to Watchlist';
+            <p>If you run into any issues or want to share feedback, feel free to reach out!</p>
 
-  setupSources(imdbId, type);
-}
+            <p><strong>Contact me:</strong> ismailhossain013@gmail.com | <a href="https://github.com/smile-plzz" target="_blank">GitHub: smile-plzz</a></p>
 
-/* ─── SOURCE SETUP ─── */
-const SOURCES_MOVIE = [
-  // --- Original Sources ---
-  {name:'VidSrc',        url: id => `https://vidsrc.to/embed/movie/${id}`},
-  {name:'VidSrc.me',     url: id => `https://vidsrc.me/embed/movie?imdb=${id}`},
-  {name:'SuperEmbed',    url: id => `https://multiembed.mov/?video_id=${id}&tmdb=0`},
-  {name:'2Embed',        url: id => `https://www.2embed.cc/embed/${id}`},
-  {name:'AutoEmbed',     url: id => `https://player.autoembed.cc/embed/movie/${id}`},
-  {name:'SmashyStream',  url: id => `https://embed.smashystream.com/playere.php?imdb=${id}`},
+            <p>(Fun fact: I also run a small video production firm called 15 Miles — we make drone films, documentaries, and creative content.)</p>
+        </div>
+    </div>
 
-  // --- New Sources ---
-  {name:'VidSrc.cc',     url: id => `https://vidsrc.cc/v2/embed/movie/${id}`},
-  {name:'VidSrc.net',    url: id => `https://vidsrc.net/embed/movie?imdb=${id}`},
-  {name:'Embed.su',      url: id => `https://embed.su/embed/movie/${id}`},
-  {name:'VidLink',       url: id => `https://vidlink.pro/movie/${id}?autoplay=true`},
-  {name:'2Embed.stream', url: id => `https://www.2embed.stream/embed/movie/${id}`},
-  {name:'AutoEmbed.co',  url: id => `https://autoembed.co/movie/imdb/${id}`},
-  {name:'IMDbEmbed',     url: id => `https://imdbembed.xyz/movie/imdb/${id}`},
-  {name:'GoDrivePlayer', url: id => `https://godriveplayer.com/player.php?imdb=${id}`},
-  {name:'NontonGo',      url: id => `https://www.nontongo.win/embed/movie/${id}`},
-  {name:'MoviesAPI',     url: id => `https://moviesapi.club/movie/${id}`},
-];
+    <footer class="footer">
+        <p>&copy; 2025 NowShowing. All Rights Reserved.</p>
+        <p>Powered by OMDb and VidSrc</p>
+    </footer>
 
-const SOURCES_TV = [
-  // --- Original Sources ---
-  {name:'VidSrc',        url: (id,s,e) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}`},
-  {name:'VidSrc.me',     url: (id,s,e) => `https://vidsrc.me/embed/tv?imdb=${id}&season=${s}&episode=${e}`},
-  {name:'SuperEmbed',    url: (id,s,e) => `https://multiembed.mov/?video_id=${id}&tmdb=0&s=${s}&e=${e}`},
-  {name:'2Embed',        url: (id,s,e) => `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`},
-  {name:'AutoEmbed',     url: (id,s,e) => `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`},
-  {name:'SmashyStream',  url: (id,s,e) => `https://embed.smashystream.com/playere.php?imdb=${id}&season=${s}&episode=${e}`},
-
-  // --- New Sources ---
-  {name:'VidSrc.cc',     url: (id,s,e) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`},
-  {name:'VidSrc.net',    url: (id,s,e) => `https://vidsrc.net/embed/tv?imdb=${id}&season=${s}&episode=${e}`},
-  {name:'Embed.su',      url: (id,s,e) => `https://embed.su/embed/tv/${id}/${s}/${e}`},
-  {name:'VidLink',       url: (id,s,e) => `https://vidlink.pro/tv/${id}/${s}/${e}?autoplay=true`},
-  {name:'2Embed.stream', url: (id,s,e) => `https://www.2embed.stream/embed/tv/${id}/${s}/${e}`},
-  {name:'AutoEmbed.co',  url: (id,s,e) => `https://autoembed.co/tv/imdb/${id}-${s}-${e}`},
-  {name:'IMDbEmbed',     url: (id,s,e) => `https://imdbembed.xyz/tv/imdb/${id}-${s}-${e}`},
-  {name:'GoDrivePlayer', url: (id,s,e) => `https://godriveplayer.com/player.php?imdb=${id}&s=${s}&e=${e}`},
-  {name:'NontonGo',      url: (id,s,e) => `https://www.nontongo.win/embed/tv/${id}/${s}/${e}`},
-  {name:'MoviesAPI',     url: (id,s,e) => `https://moviesapi.club/tv/${id}-${s}-${e}`},
-];
-let activeSrcIdx=0;
-function setupSources(imdbId, type){
-  const row=$('source-buttons');
-  const sources=type==='series'?SOURCES_TV:SOURCES_MOVIE;
-  sources.forEach((src,i)=>{
-    const btn=document.createElement('button');
-    btn.className='src-btn'+(i===0?' active green':'');
-    btn.textContent=src.name;
-    btn.onclick=()=>{
-      activeSrcIdx=i;
-      $$('#source-buttons .src-btn').forEach((b,j)=>{b.classList.toggle('active',j===i);b.classList.toggle('green',j===i);});
-      if(type==='series'){loadTVSource();}
-      else{$('video-player').src=src.url(imdbId);$('video-play-overlay').style.display='none';}
-    };
-    row.appendChild(btn);
-  });
-  if(type!=='series'){
-    $('video-player').src=sources[0].url(imdbId);
-    $('video-play-overlay').style.display='none';
-  } else {
-    setupSeasonEpisode(imdbId);
-  }
-  const notifBtn=document.createElement('button');
-  notifBtn.className='src-btn';notifBtn.innerHTML='<i class="fas fa-question-circle"></i>';
-  notifBtn.title='Having trouble?';notifBtn.onclick=()=>openNotif('switch-source-notification-modal');
-  row.appendChild(notifBtn);
-}
-function setupSeasonEpisode(imdbId){
-  const sel=$('season-episode-selector');sel.style.display='flex';
-  const ss=$('season-select'),es=$('episode-select');ss.innerHTML='';es.innerHTML='';
-  for(let i=1;i<=10;i++){const o=document.createElement('option');o.value=i;o.textContent=`Season ${i}`;ss.appendChild(o);}
-  for(let i=1;i<=25;i++){const o=document.createElement('option');o.value=i;o.textContent=`Episode ${i}`;es.appendChild(o);}
-  ss.onchange=es.onchange=loadTVSource;
-  loadTVSource();
-}
-function loadTVSource(){
-  const s=$('season-select').value,e=$('episode-select').value;
-  const src=(currentType==='series'?SOURCES_TV:SOURCES_MOVIE)[activeSrcIdx];
-  $('video-player').src=src.url(currentIMDb,s,e);
-  $('video-play-overlay').style.display='none';
-}
-
-/* ─── WATCHLIST TOGGLE IN MODAL ─── */
-$('watchlist-toggle').onclick=function(){
-  if(!currentIMDb)return;
-  const item={imdbID:currentIMDb,Type:currentType,Title:currentTitle,Poster:'N/A',Year:''};
-  toggleWatchlist(item);
-  const inWL=isInWatchlist(currentIMDb);
-  this.classList.toggle('saved',inWL);
-  this.querySelector('.watchlist-toggle-text').textContent=inWL?'Remove from Watchlist':'Add to Watchlist';
-};
-
-/* ─── OMDB FETCH ─── */
-const OMDB_API_KEY='thewdb';
-async function fetchOMDB(params){
-  try{
-    const q=new URLSearchParams({apikey:OMDB_API_KEY,...params});
-    const r=await fetch(`https://www.omdbapi.com/?${q}`);
-    return await r.json();
-  }catch{return null;}
-}
-
-/* ─── FILL MODAL WITH OMDB ─── */
-(function patchModalOpen(){
-  const orig=openModal;
-  window.openModal=function(imdbId,type,title){
-    orig(imdbId,type,title);
-    fetchOMDB({i:imdbId,plot:'full'}).then(d=>{
-      if(!d||d.Response==='False')return;
-      const set=(id,val)=>{const el=$(id);if(el)el.textContent=val&&val!=='N/A'?val:'—';};
-      set('modal-movie-title',d.Title);set('modal-movie-plot',d.Plot);
-      set('modal-movie-genre',d.Genre);set('modal-movie-released',d.Released);
-      set('modal-movie-rating',d.imdbRating?`⭐ ${d.imdbRating}/10 (${d.imdbVotes} votes)`:'—');
-      set('modal-movie-rated',d.Rated);set('modal-movie-director',d.Director);
-      set('modal-movie-writer',d.Writer);set('modal-movie-actors',d.Actors);
-      set('modal-movie-awards',d.Awards);set('modal-movie-runtime',d.Runtime);
-      set('modal-movie-language',d.Language);set('modal-movie-country',d.Country);
-      set('modal-movie-metascore',d.Metascore);set('modal-movie-boxoffice',d.BoxOffice);
-      set('modal-movie-production',d.Production);
-      if(d.Website&&d.Website!=='N/A'){$('modal-movie-website').innerHTML=`<a href="${d.Website}" target="_blank" style="color:var(--accent)">${d.Website}</a>`;}
-      else set('modal-movie-website','—');
-      if(d.Poster&&d.Poster!=='N/A')$('modal-movie-poster').src=d.Poster;
-      if(d.Ratings&&d.Ratings.length){
-        $('modal-movie-other-ratings').innerHTML=d.Ratings.map(r=>`<span class="rating-pill"><i class="fas fa-star" style="font-size:0.6rem;color:var(--gold)"></i>${r.Source}: ${r.Value}</span>`).join('');
-      }
-      const inWL=isInWatchlist(imdbId);
-      const wlBtn=$('watchlist-toggle');
-      wlBtn.classList.toggle('saved',inWL);
-      wlBtn.querySelector('.watchlist-toggle-text').textContent=inWL?'Remove from Watchlist':'Add to Watchlist';
-      addToContinue({imdbID:imdbId,Type:type,Title:d.Title,Poster:d.Poster,Year:d.Year});
-      updateContinueSection();
-      loadRecommendations(d.Genre, imdbId);
-    });
-  };
-})();
-
-async function loadRecommendations(genre, excludeId){
-  if(!genre||genre==='N/A')return;
-  const g=genre.split(',')[0].trim();
-  const d=await fetchOMDB({s:g,type:'movie'});
-  if(!d||!d.Search)return;
-  const filtered=d.Search.filter(m=>m.imdbID!==excludeId).slice(0,6);
-  if(!filtered.length)return;
-  const grid=$('recommendations-grid');grid.innerHTML='';
-  filtered.forEach(m=>grid.appendChild(makeCard(m,true)));
-  $('recommendations-section').style.display='';
-}
-
-/* ─── SEARCH ─── */
-let searchPage=1, currentSearchTerm='', currentSearchType='';
-async function doSearch(term, type, page=1){
-  const params={s:term,page};if(type)params.type=type;
-  const d=await fetchOMDB(params);
-  return d&&d.Search?d.Search:[];
-}
-async function handleSearch(){
-  const term=$('search-input').value.trim();
-  if(!term)return;
-  currentSearchTerm=term;
-  currentSearchType=$$('.type-filter-btn.active')[0]?.dataset.type||'';
-  searchPage=1;
-  const sec=$('search-results-section'),grid=$('search-results');
-  sec.style.display='';
-  $('search-results-heading').textContent=`Results for "${term}"`;
-  $('popular-movies-section').style.display='none';
-  $('popular-tv-section').style.display='none';
-  grid.innerHTML='';
-  const results=await doSearch(term,currentSearchType,1);
-  results.forEach(m=>grid.appendChild(makeCard(m)));
-  window.scrollTo({top:$('search-results-section').offsetTop-80,behavior:'smooth'});
-}
-$('search-button').onclick=handleSearch;
-$('search-input').addEventListener('keydown',e=>{if(e.key==='Enter')handleSearch();});
-$('load-more-search').onclick=async()=>{
-  searchPage++;
-  const results=await doSearch(currentSearchTerm,currentSearchType,searchPage);
-  results.forEach(m=>$('search-results').appendChild(makeCard(m)));
-};
-
-/* ─── POPULAR CONTENT ─── */
-const POPULAR_MOVIE_IDS=['tt0111161','tt0068646','tt0468569','tt0071562','tt0050083','tt0108052','tt0167260','tt0110912','tt0120737','tt0137523','tt0109830','tt1375666','tt0080684','tt0133093','tt0073486','tt0099685','tt0047478','tt0317248','tt0816692','tt0114369','tt0102926','tt0245429','tt0038650','tt0120815','tt0076759','tt6751668','tt0172495','tt0407887','tt0088763','tt0060196'];
-const POPULAR_TV_IDS=['tt0944947','tt0903747','tt0795176','tt1190634','tt2395695','tt0386676','tt1831804','tt3032476','tt0773262','tt0804503','tt2306299','tt0108778','tt0149460','tt1475582','tt0417299','tt0096697','tt2861424','tt4574334','tt2442560','tt3398228'];
-let moviePage=0, tvPage=0;
-const PAGE_SIZE=12;
-
-async function loadPopularMovies(loadMore=false){
-  if(!loadMore)moviePage=0;
-  const ids=POPULAR_MOVIE_IDS.slice(moviePage*PAGE_SIZE,(moviePage+1)*PAGE_SIZE);moviePage++;
-  const grid=$('popular-movies');
-  const results=await Promise.all(ids.map(id=>fetchOMDB({i:id})));
-  results.filter(Boolean).forEach(m=>grid.appendChild(makeCard(m)));
-}
-async function loadPopularTV(loadMore=false){
-  if(!loadMore)tvPage=0;
-  const ids=POPULAR_TV_IDS.slice(tvPage*PAGE_SIZE,(tvPage+1)*PAGE_SIZE);tvPage++;
-  const grid=$('popular-tv-shows');
-  const results=await Promise.all(ids.map(id=>fetchOMDB({i:id})));
-  results.filter(Boolean).forEach(m=>grid.appendChild(makeCard(m)));
-}
-$('load-more-popular').onclick=()=>loadPopularMovies(true);
-$('load-more-popular-tv').onclick=()=>loadPopularTV(true);
-
-/* ─── NEWS ─── */
-const NEWS_API='https://newsapi.org/v2/top-headlines?category=entertainment&language=en&apiKey=demo';
-const FALLBACK_NEWS=[
-  {title:'Marvel Studios Announces Phase 6 Lineup',source:{name:'Hollywood Reporter'},publishedAt:'2025-06-01',url:'#',urlToImage:'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400'},
-  {title:'Streaming Wars: Netflix vs Disney+ Subscriber Battle',source:{name:'Variety'},publishedAt:'2025-05-28',url:'#',urlToImage:'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=400'},
-  {title:'Best Movies of 2025: Critics Weigh In',source:{name:'Rotten Tomatoes'},publishedAt:'2025-05-25',url:'#',urlToImage:'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400'},
-  {title:'Top TV Shows to Binge This Weekend',source:{name:'IMDb'},publishedAt:'2025-05-22',url:'#',urlToImage:'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=400'},
-  {title:'Award Season Preview: Early Oscar Contenders',source:{name:'Deadline'},publishedAt:'2025-05-20',url:'#',urlToImage:'https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?w=400'},
-  {title:'Sci-Fi Cinema: The Best of the Decade',source:{name:'Wired'},publishedAt:'2025-05-18',url:'#',urlToImage:'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400'},
-];
-async function loadNews(){
-  const grid=$('news-grid');
-  try{
-    const r=await fetch(NEWS_API);
-    const d=await r.json();
-    const articles=d.articles&&d.articles.length?d.articles:FALLBACK_NEWS;
-    renderNews(articles.slice(0,6),grid);
-  }catch{renderNews(FALLBACK_NEWS,grid);}
-}
-function renderNews(articles, grid){
-  grid.innerHTML='';
-  articles.forEach(a=>{
-    const card=document.createElement('div');
-    card.className='news-card';
-    card.innerHTML=`
-      <div class="news-thumb"><img src="${a.urlToImage||''}" alt="" loading="lazy" onerror="this.style.display='none'"></div>
-      <div class="news-body">
-        <div class="news-source">${a.source?.name||'Entertainment'}</div>
-        <div class="news-title">${a.title}</div>
-        <div class="news-date">${new Date(a.publishedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
-      </div>`;
-    card.onclick=()=>{if(a.url&&a.url!=='#')window.open(a.url,'_blank');};
-    grid.appendChild(card);
-  });
-}
-
-/* ─── NAV LINKS ─── */
-function navTo(section){
-  ['popular-movies-section','popular-tv-section','watchlist-section','continue-watching-section','search-results-section'].forEach(id=>{
-    const el=$(id);if(el)el.style.display='none';
-  });
-  closeDrawer();
-  if(section==='movies'){
-    $('popular-movies-section').style.display='';
-    if(!$('popular-movies').children.length)loadPopularMovies();
-    setActiveNav('movies-nav-link');
-    window.scrollTo({top:$('popular-movies-section').offsetTop-80,behavior:'smooth'});
-  } else if(section==='tv'){
-    $('popular-tv-section').style.display='';
-    if(!$('popular-tv-shows').children.length)loadPopularTV();
-    setActiveNav('tv-shows-nav-link');
-    window.scrollTo({top:$('popular-tv-section').offsetTop-80,behavior:'smooth'});
-  } else if(section==='watchlist'){
-    $('watchlist-section').style.display='';
-    renderWatchlist();
-    setActiveNav('watchlist-nav-link');
-    window.scrollTo({top:$('watchlist-section').offsetTop-80,behavior:'smooth'});
-  } else if(section==='continue'){
-    $('continue-watching-section').style.display='';
-    renderContinue();
-    setActiveNav('continue-nav-link');
-    window.scrollTo({top:$('continue-watching-section').offsetTop-80,behavior:'smooth'});
-  } else {
-    $('popular-movies-section').style.display='';
-    setActiveNav('home-nav');
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
-}
-$('movies-nav-link').onclick=e=>{e.preventDefault();navTo('movies');};
-$('tv-shows-nav-link').onclick=e=>{e.preventDefault();navTo('tv');};
-$('watchlist-nav-link').onclick=e=>{e.preventDefault();navTo('watchlist');};
-$('continue-nav-link').onclick=e=>{e.preventDefault();navTo('continue');};
-$('mobile-movies-nav-link').onclick=e=>{e.preventDefault();navTo('movies');};
-$('mobile-tv-shows-nav-link').onclick=e=>{e.preventDefault();navTo('tv');};
-$('mobile-watchlist-nav-link').onclick=e=>{e.preventDefault();navTo('watchlist');};
-$('mobile-continue-nav-link').onclick=e=>{e.preventDefault();navTo('continue');};
-
-/* ─── PLAY OVERLAY ─── */
-$('video-play-overlay').onclick=function(){
-  this.style.display='none';
-  const iframe=$('video-player');
-  iframe.contentWindow?.postMessage({action:'play'},'*');
-};
-
-/* ─── INIT ─── */
-loadPopularMovies();
-loadNews();
-const continueData=getContinue();
-if(continueData.length){$('continue-watching-section').style.display='';renderContinue();}
-</script>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js');
+            });
+        }
+    </script>
+    <script src="app.js"></script>
 </body>
 </html>
