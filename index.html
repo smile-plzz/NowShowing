@@ -144,6 +144,230 @@ Click “Play” if you want to risk your time, your browser, or your dignity. T
             <h2>Continue Watching</h2>
             <div class="movies-grid" id="continue-watching-grid" aria-live="polite"></div>
         </section>
+        
+        <!-- ──────────────────────────────────────────────── -->
+<!--     Continue Watching - Resume where left off     -->
+<!-- ──────────────────────────────────────────────── -->
+
+<section class="movies-section" id="continue-watching-section">
+    <h2>Continue Watching</h2>
+    <div class="movies-grid" id="continue-watching-grid"></div>
+</section>
+
+<script>
+// ────────────────────────────────────────────────
+//   Resume / Continue Watching logic
+// ────────────────────────────────────────────────
+
+const CONTINUE_KEY = "nowshowing_continue_watching";
+const MAX_CONTINUE_ITEMS = 12;
+
+function saveContinueWatching(item) {
+    if (!item || !item.imdbID) return;
+
+    let list = JSON.parse(localStorage.getItem(CONTINUE_KEY) || "[]");
+
+    // Remove previous entry for same content
+    list = list.filter(entry => entry.imdbID !== item.imdbID);
+
+    // Add new / updated entry at the beginning
+    list.unshift({
+        imdbID:      item.imdbID,
+        title:       item.Title       || "Unknown Title",
+        poster:      item.Poster      || "https://via.placeholder.com/300x450?text=No+Poster",
+        type:        item.Type        || "movie",
+        season:      item.season      || null,
+        episode:     item.episode     || null,
+        currentTime: item.currentTime || 0,
+        duration:    item.duration    || 0,
+        sourceUrl:   item.sourceUrl   || "",
+        lastWatched: Date.now()
+    });
+
+    // Keep only the most recent items
+    if (list.length > MAX_CONTINUE_ITEMS) {
+        list.length = MAX_CONTINUE_ITEMS;
+    }
+
+    localStorage.setItem(CONTINUE_KEY, JSON.stringify(list));
+    renderContinueWatching();
+}
+
+function renderContinueWatching() {
+    const grid = document.getElementById("continue-watching-grid");
+    if (!grid) return;
+
+    const list = JSON.parse(localStorage.getItem(CONTINUE_KEY) || "[]");
+    grid.innerHTML = "";
+
+    if (list.length === 0) {
+        grid.innerHTML = `<p class="empty-message" style="grid-column: 1 / -1; text-align:center; color:#aaa; padding:3rem 1rem;">No watching history yet...</p>`;
+        document.getElementById("continue-watching-section").style.display = "none";
+        return;
+    }
+
+    document.getElementById("continue-watching-section").style.display = "block";
+
+    list.forEach(entry => {
+        const card = document.createElement("div");
+        card.className = "movie-card continue-card";
+        card.dataset.imdbid = entry.imdbID;
+
+        const progress = entry.duration > 10 
+            ? Math.min(99, Math.round((entry.currentTime / entry.duration) * 100))
+            : 0;
+
+        card.innerHTML = `
+            <div class="poster-wrapper">
+                <img src="${entry.poster}" alt="${entry.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=∅'">
+                ${progress > 5 ? `
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progress}%"></div>
+                </div>` : ''}
+                <div class="resume-overlay">
+                    <div class="resume-btn">Resume →</div>
+                </div>
+            </div>
+            <div class="movie-info">
+                <h3>${entry.title}</h3>
+                <p class="meta">
+                    ${entry.type === "series" ? `S${entry.season || "?"} E${entry.episode || "?"} • ` : ""}
+                    ${progress > 5 ? `${Math.round(entry.currentTime/60)} min watched` : "Start watching"}
+                </p>
+            </div>
+        `;
+
+        // Click → open modal and try to resume
+        card.addEventListener("click", () => {
+            // We'll reuse your existing movie modal logic
+            // You need to call your function that opens the modal
+            // Example: openMovieModal(entry.imdbID, entry.type);
+
+            // ── TEMPORARY FALLBACK BEHAVIOR ──
+            // Replace the line below with your actual modal-opening function
+            alert(`Should open ${entry.title} and seek to ${Math.round(entry.currentTime)}s\n(Implement open modal + set currentTime)`);
+
+            // If you already have a global function like loadMovie(imdbID, type), use:
+            // loadMovie(entry.imdbID, entry.type, entry);
+        });
+
+        grid.appendChild(card);
+    });
+}
+
+// Try to resume video time when iframe loads (best effort)
+document.addEventListener("DOMContentLoaded", () => {
+    const iframe = document.getElementById("video-player");
+    if (!iframe) return;
+
+    iframe.addEventListener("load", () => {
+        const currentSrc = iframe.src;
+        if (!currentSrc) return;
+
+        let list = JSON.parse(localStorage.getItem(CONTINUE_KEY) || "[]");
+        const match = list.find(item => item.sourceUrl === currentSrc || currentSrc.includes(item.imdbID));
+
+        if (match && match.currentTime > 10) {
+            // Very rough attempt — many players don't allow seeking via postMessage
+            console.log(`Trying to resume → ${match.title} @ ${match.currentTime}s`);
+            // You would need player-specific code here (Vimeo, YouTube, custom player...)
+        }
+    });
+});
+
+// Save current time periodically while watching
+let saveInterval = null;
+
+function startSavingProgress() {
+    if (saveInterval) clearInterval(saveInterval);
+
+    saveInterval = setInterval(() => {
+        const iframe = document.getElementById("video-player");
+        if (!iframe || !iframe.src || iframe.src.trim() === "") return;
+
+        // You need real currentTime & duration — this is placeholder only
+        // In real implementation → use postMessage / player API
+        const fakeCurrent = Math.random() * 7200;   // dummy
+        const fakeDuration = 7200;
+
+        saveContinueWatching({
+            imdbID:     /* get from modal or data */,
+            Title:      document.getElementById("modal-movie-title")?.textContent || "",
+            Poster:     document.getElementById("modal-movie-poster")?.src || "",
+            Type:       /* movie/series from your data */,
+            sourceUrl:  iframe.src,
+            currentTime: fakeCurrent,
+            duration:    fakeDuration,
+            // season, episode if series
+        });
+    }, 15000); // every 15 seconds
+}
+
+// Optional: stop saving when modal closes
+document.querySelector("#video-modal .close-button")?.addEventListener("click", () => {
+    if (saveInterval) clearInterval(saveInterval);
+    saveInterval = null;
+});
+
+// Load on page start
+renderContinueWatching();
+
+// ── Tip: Call saveContinueWatching(…) every time user starts playing a new source
+// ── You should also call it when closing modal / switching source
+
+</script>
+
+<style>
+.continue-card .poster-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+.progress-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 5px;
+    background: rgba(0,0,0,0.5);
+}
+.progress-fill {
+    height: 100%;
+    background: #e50914;
+    transition: width 0.4s ease;
+}
+.resume-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.movie-card:hover .resume-overlay {
+    opacity: 1;
+}
+.resume-btn {
+    background: #e50914;
+    color: white;
+    padding: 0.6rem 1.4rem;
+    border-radius: 2rem;
+    font-weight: bold;
+    font-size: 1rem;
+}
+.empty-message {
+    font-style: italic;
+    color: #777;
+}
+</style>
+
+
+
+
+
+
+
+
+
 
         <section class="movies-section" id="watchlist-section" style="display: none;">
             <h2>Your Watchlist</h2>
