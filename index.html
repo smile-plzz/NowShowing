@@ -83,6 +83,225 @@ Click “Play” if you want to risk your time, your browser, or your dignity. T
         
         
   <br> <br> <br>
+    
+    <!-- =====================================================================
+     CONTINUE WATCHING SECTION – single paste block for mobile-friendly
+     Paste this AFTER the search section / before popular movies section
+===================================================================== -->
+
+<section class="movies-section" id="continue-watching-section" style="display:none; margin: 2.5rem 0 1.5rem;">
+  <h2 style="color:#fff; font-size:1.6rem; text-align:center; margin-bottom:1.2rem;">Continue Watching</h2>
+  
+  <div id="continue-watching-grid" style="
+    display:flex;
+    overflow-x:auto;
+    gap:1.1rem;
+    padding:0.8rem 0.4rem 1.6rem;
+    scroll-behavior:smooth;
+    scrollbar-width:thin;
+    scrollbar-color:#555 #222;
+  ">
+    <!-- items will be inserted here -->
+  </div>
+
+  <style>
+    #continue-watching-grid::-webkit-scrollbar { height:8px; }
+    #continue-watching-grid::-webkit-scrollbar-track { background:#1a1a1a; }
+    #continue-watching-grid::-webkit-scrollbar-thumb { background:#555; border-radius:4px; }
+
+    .continue-item {
+      flex:0 0 220px;
+      width:220px;
+      background:#111;
+      border-radius:10px;
+      overflow:hidden;
+      transition:all 0.18s ease;
+      cursor:pointer;
+      box-shadow:0 4px 12px rgba(0,0,0,0.5);
+    }
+    .continue-item:hover {
+      transform:translateY(-6px) scale(1.04);
+      box-shadow:0 12px 30px rgba(229,9,20,0.35);
+    }
+    .continue-poster {
+      width:100%;
+      height:330px;
+      object-fit:cover;
+      display:block;
+    }
+    .continue-info {
+      padding:0.9rem 0.85rem;
+    }
+    .continue-title {
+      margin:0 0 0.4rem;
+      font-size:1rem;
+      font-weight:600;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      color:#fff;
+    }
+    .continue-season-ep {
+      margin:0 0 0.6rem;
+      font-size:0.82rem;
+      color:#bbb;
+    }
+    .progress-container {
+      height:5px;
+      background:#222;
+      border-radius:3px;
+      margin:0.7rem 0 0.9rem;
+      overflow:hidden;
+    }
+    .progress-bar {
+      height:100%;
+      background:#e50914;
+      width:0%;
+      transition:width 0.5s ease;
+    }
+    .continue-resume-btn {
+      background:#e50914;
+      color:white;
+      border:none;
+      width:100%;
+      padding:0.65rem;
+      border-radius:6px;
+      font-weight:600;
+      font-size:0.92rem;
+      cursor:pointer;
+      transition:background 0.2s;
+    }
+    .continue-resume-btn:hover { background:#c40711; }
+    .continue-empty {
+      color:#777;
+      text-align:center;
+      padding:3rem 1rem;
+      font-style:italic;
+      width:100%;
+    }
+  </style>
+</section>
+
+<script>
+// =============================================================================
+// CONTINUE WATCHING – minimal version (paste after the section above)
+// =============================================================================
+
+const CONTINUE_KEY = "nowshowing_continue";
+const MAX_ITEMS = 10;
+
+function getContinueItems() {
+  try {
+    const data = localStorage.getItem(CONTINUE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveContinueItems(items) {
+  try {
+    // newest first + remove duplicates
+    const seen = new Set();
+    const unique = items.filter(item => {
+      const key = item.imdbID + (item.season ? `|${item.season}|${item.episode||''}` : '');
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, MAX_ITEMS);
+
+    localStorage.setItem(CONTINUE_KEY, JSON.stringify(unique));
+  } catch {}
+}
+
+function renderContinueWatching() {
+  const grid = document.getElementById("continue-watching-grid");
+  const section = document.getElementById("continue-watching-section");
+  if (!grid || !section) return;
+
+  const items = getContinueItems();
+
+  if (items.length === 0) {
+    section.style.display = "none";
+    return;
+  }
+
+  section.style.display = "block";
+  grid.innerHTML = "";
+
+  items.forEach(item => {
+    const percent = item.duration > 0 ? Math.min(99, Math.floor(item.currentTime / item.duration * 100)) : 0;
+
+    const div = document.createElement("div");
+    div.className = "continue-item";
+    div.innerHTML = `
+      <img class="continue-poster" src="${item.poster || 'https://via.placeholder.com/220x330?text=No+Poster'}" alt="${item.title}" loading="lazy">
+      <div class="continue-info">
+        <div class="continue-title">${item.title}</div>
+        ${item.type === "series" && item.season ? `<div class="continue-season-ep">S${item.season} E${item.episode||'?'} • ${Math.floor(item.currentTime/60)}m</div>` : ""}
+        <div class="progress-container"><div class="progress-bar" style="width:${percent}%"></div></div>
+        <button class="continue-resume-btn">Resume</button>
+      </div>
+    `;
+
+    // === IMPORTANT ===
+    // Replace the line below with YOUR actual function that opens the modal
+    // and starts playing the correct source
+    div.addEventListener("click", () => {
+      // Example placeholder – adapt to your real code
+      alert(`Open modal for ${item.title} (imdb: ${item.imdbID}) and try to resume at ~${Math.floor(item.currentTime)} seconds`);
+      // Real usage example:
+      // openMovieModal(item.imdbID, item.type, item.season, item.episode);
+    });
+
+    grid.appendChild(div);
+  });
+}
+
+// Run once when page loads
+document.addEventListener("DOMContentLoaded", renderContinueWatching);
+
+// Optional: call this function from your code whenever you close the video modal
+// or when you want to refresh the list
+window.renderContinueWatching = renderContinueWatching;
+
+// ────────────────────────────────────────────────
+// Example usage – call this when video starts / modal opens
+// You should call this in your play logic
+// ────────────────────────────────────────────────
+window.addContinueWatchingEntry = function(imdbID, title, poster, type, season=null, episode=null, sourceUrl, currentTime=0, duration=0) {
+  let items = getContinueItems();
+  
+  // remove old entry for same content
+  items = items.filter(i => 
+    !(i.imdbID === imdbID && 
+      (season ? i.season === season && i.episode === episode : true))
+  );
+
+  items.unshift({
+    imdbID,
+    title,
+    poster,
+    type,
+    season,
+    episode,
+    sourceUrl,
+    currentTime: Math.max(currentTime, 0),
+    duration: Math.max(duration, 0),
+    timestamp: new Date().toISOString()
+  });
+
+  saveContinueItems(items);
+  renderContinueWatching();
+};
+
+</script>
+    
+    
+    
+    
+    
+    
 
 <style>
   .discover-section {
