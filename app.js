@@ -152,27 +152,31 @@ document.addEventListener('DOMContentLoaded', () => {
     let globalMovieCache = []; 
 
     const videoSources = [
-        { name: 'VidCloud', url: 'https://vidcloud.stream/', tvUrl: 'https://vidcloud.stream/' },
-        { name: 'fsapi.xyz', url: 'https://fsapi.xyz/movie/', tvUrl: 'https://fsapi.xyz/tv-imdb/' },
-        { name: 'CurtStream', url: 'https://curtstream.com/movies/imdb/', tvUrl: null },
-        { name: 'VidSrc.to', url: 'https://vidsrc.to/embed/movie/', tvUrl: 'https://vidsrc.to/embed/tv/' },
-        { name: 'VidSrc.xyz', url: 'https://vidsrc.xyz/embed/movie/', tvUrl: 'https://vidsrc.xyz/embed/tv/' },
-        { name: 'VidSrc.in', url: 'https://vidsrc.in/embed/movie/', tvUrl: 'https://vidsrc.in/embed/tv/' },
-        { name: 'SuperEmbed', url: 'https://superembed.stream/movie/', tvUrl: 'https://superembed.stream/tv/' },
-        { name: 'MoviesAPI', url: 'https://moviesapi.club/movie/', tvUrl: 'https://moviesapi.club/tv/' },
-        { name: '2Embed', url: 'https://2embed.cc/embed/', tvUrl: 'https://2embed.cc/embed/' },
-        { name: 'Fmovies', url: 'https://fmovies.to/embed/', tvUrl: 'https://fmovies.to/embed/' },
-        { name: 'LookMovie', url: 'https://lookmovie.io/player/', tvUrl: 'https://lookmovie.io/player/' },
-        { name: 'AutoEmbed', url: 'https://autoembed.cc/embed/', tvUrl: 'https://autoembed.cc/embed/' },
-        // Extended Sources
-        { name: 'MultiEmbed', url: 'https://multiembed.mov/?video_id=', tvUrl: 'https://multiembed.mov/?video_id=' },
-        { name: 'EmbedStream', url: 'https://embed.stream/movie/', tvUrl: 'https://embed.stream/tv/' },
-        { name: 'DopeBox', url: 'https://dopebox.to/movie/', tvUrl: 'https://dopebox.to/tv/' },
-        { name: 'Vidplay', url: 'https://vidplay.online/embed/movie/', tvUrl: 'https://vidplay.online/embed/tv/' },
-        { name: 'StreamSB', url: 'https://streamsb.net/e/', tvUrl: 'https://streamsb.net/e/' }, 
-        { name: 'MovieHut', url: 'https://moviehut.tv/embed/movie/', tvUrl: 'https://moviehut.tv/embed/tv/' },
-        { name: 'VidsHub', url: 'https://vidshub.xyz/embed/movie/', tvUrl: 'https://vidshub.xyz/embed/tv/' },
-    ];
+    // ─── Tier 1: Most Reliable (confirmed active Apr 2026) ───────────────────
+    { name: 'VidSrc.icu',   url: 'https://vidsrc.icu/embed/movie/',          tvUrl: 'https://vidsrc.icu/embed/tv/' },
+    { name: 'VidLink',      url: 'https://vidlink.pro/movie/',                tvUrl: 'https://vidlink.pro/tv/' },           // TMDB ID
+    { name: 'Embed.su',     url: 'https://embed.su/embed/movie/',             tvUrl: 'https://embed.su/embed/tv/' },        // TMDB ID
+    { name: 'VidSrc.to',    url: 'https://vidsrc.to/embed/movie/',            tvUrl: 'https://vidsrc.to/embed/tv/' },
+    { name: 'VidSrc.me',    url: 'https://v2.vidsrc.me/embed/',               tvUrl: 'https://v2.vidsrc.me/embed/' },
+    { name: 'AutoEmbed',    url: 'https://autoembed.co/movie/imdb/',          tvUrl: 'https://autoembed.co/tv/imdb/' },
+    { name: 'VidFast',      url: 'https://vidfast.pro/movie/',                tvUrl: 'https://vidfast.pro/tv/' },           // TMDB ID
+
+    // ─── Tier 2: Reliable with good 2025/2026 activity ───────────────────────
+    { name: 'MultiEmbed',   url: 'https://multiembed.mov/?video_id=',        tvUrl: 'https://multiembed.mov/?video_id=' }, // append &s=1&e=1 for TV
+    { name: '2Embed',       url: 'https://www.2embed.cc/embed/',              tvUrl: 'https://www.2embed.cc/embedtv/' },
+    { name: '2Embed.stream',url: 'https://www.2embed.stream/embed/movie/',   tvUrl: 'https://www.2embed.stream/embed/tv/' },
+    { name: 'VidSrc.xyz',   url: 'https://vidsrc.xyz/embed/movie/',          tvUrl: 'https://vidsrc.xyz/embed/tv/' },
+    { name: 'VidSrc.in',    url: 'https://vidsrc.in/embed/movie/',           tvUrl: 'https://vidsrc.in/embed/tv/' },
+    { name: '111Movies',    url: 'https://111movies.com/movie/',              tvUrl: 'https://111movies.com/tv/' },
+
+    // ─── Tier 3: Extended / Supplemental ─────────────────────────────────────
+    { name: 'SuperEmbed',   url: 'https://multiembed.mov/?video_id=',        tvUrl: 'https://multiembed.mov/?video_id=' }, // SuperEmbed routes via multiembed.mov
+    { name: 'MoviesAPI',    url: 'https://moviesapi.club/movie/',             tvUrl: 'https://moviesapi.club/tv/' },
+    { name: 'EmbedMaster',  url: 'https://embedmaster.link/embed/movie/',    tvUrl: 'https://embedmaster.link/embed/tv/' },
+    { name: 'fsapi',        url: 'https://fsapi.xyz/movie/',                 tvUrl: 'https://fsapi.xyz/tv-imdb/' },
+    { name: 'VidSrc.mov',   url: 'https://vidsrc.mov/embed/movie/',          tvUrl: 'https://vidsrc.mov/embed/tv/' },
+];
+
 
     // Merge custom sources from localStorage (optional): [{ name, url, tvUrl }]
     try {
